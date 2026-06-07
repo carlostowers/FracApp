@@ -242,6 +242,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
   font-family:var(--sans);font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;
   box-shadow:0 8px 32px rgba(0,212,255,.25);display:none}
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 <div id="bg"></div>
@@ -291,7 +292,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
       <div><label>Fecha</label><input type="date" id="date-in"></div>
     </div>
     <div class="bot-btns">
-      <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo con IA</button>
+      <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo</button>
       <button class="btn bgl" onclick="manualMode()" style="font-size:14px;padding:13px">Ingresar manualmente</button>
     </div>
   </div>
@@ -309,9 +310,9 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
   <h2>Leyendo tu recibo...</h2>
   <p>La IA está identificando los artículos</p>
   <div class="ss gs">
-    <div class="st on" id="s1"><div class="sd"></div>Enviando imagen</div>
+    <div class="st on" id="s1"><div class="sd"></div>Preparando OCR</div>
     <div class="st" id="s2"><div class="sd"></div>Reconociendo texto</div>
-    <div class="st" id="s3"><div class="sd"></div>Extrayendo artículos y precios</div>
+    <div class="st" id="s3"><div class="sd"></div>Analizando líneas</div>
   </div>
 </div>
 
@@ -459,71 +460,64 @@ function triggerGallery(){document.getElementById('inp-gal').value='';document.g
 function onFile(input){
   const file=input.files[0];
   if(!file) return;
-  // createImageBitmap handles HEIC natively on iOS 17+ without needing a data URL
-  createImageBitmap(file).then(bitmap=>{
+  // Show loading state
+  document.getElementById('photo-btns').style.display='none';
+  showImgStatus('Procesando imagen...');
+  // STRATEGY: objectURL is the only reliable way to decode HEIC on iOS Safari.
+  // Never use dataURL as <img> src for HEIC — it always fails.
+  // Flow: objectURL → <img> → canvas → JPEG base64 for API
+  const objURL=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    // Validate decode succeeded (0x0 means browser couldn't decode the format)
+    const w0=img.naturalWidth, h0=img.naturalHeight;
+    if(!w0||!h0){
+      URL.revokeObjectURL(objURL);
+      showImgStatus('');
+      document.getElementById('photo-btns').style.display='grid';
+      alert('Este formato de imagen no es compatible con tu navegador.\nUsa JPG, PNG o WebP.');
+      return;
+    }
     const MAX=1800;
-    let w=bitmap.width, h=bitmap.height;
-    if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
+    const scale=Math.min(1, MAX/Math.max(w0,h0));
+    const w=Math.round(w0*scale), h=Math.round(h0*scale);
     const canvas=document.createElement('canvas');
     canvas.width=w; canvas.height=h;
-    canvas.getContext('2d').drawImage(bitmap,0,0,w,h);
-    bitmap.close?.();
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(objURL);
     const jpeg=canvas.toDataURL('image/jpeg',0.88);
+    if(!jpeg||jpeg==='data:,'){
+      showImgStatus('');
+      document.getElementById('photo-btns').style.display='grid';
+      alert('Error al convertir la imagen. Intenta con otra foto.');
+      return;
+    }
     imgB64=jpeg.split(',')[1];
     imgMime='image/jpeg';
     document.getElementById('prev-img').src=jpeg;
     document.getElementById('prev-w').style.display='block';
-    document.getElementById('photo-btns').style.display='none';
+    showImgStatus('');
     document.getElementById('scan-btn').disabled=false;
-  }).catch(err=>{
-    // Fallback for browsers that don't support createImageBitmap with HEIC
-    // Try FileReader + Image element
-    console.warn('createImageBitmap failed, trying FileReader fallback:', err);
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const dataUrl=e.target.result;
-      const img=new Image();
-      img.onload=()=>{
-        const MAX=1800;
-        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
-        if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
-        const canvas=document.createElement('canvas');
-        canvas.width=w;canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        const jpeg=canvas.toDataURL('image/jpeg',0.88);
-        imgB64=jpeg.split(',')[1];imgMime='image/jpeg';
-        document.getElementById('prev-img').src=jpeg;
-        document.getElementById('prev-w').style.display='block';
-        document.getElementById('photo-btns').style.display='none';
-        document.getElementById('scan-btn').disabled=false;
-      };
-      img.onerror=()=>{
-        // Last resort: use objectURL as src
-        const objURL=URL.createObjectURL(file);
-        const img2=new Image();
-        img2.onload=()=>{
-          const MAX=1800;
-          let w=img2.naturalWidth||1200,h=img2.naturalHeight||1600;
-          if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
-          const canvas=document.createElement('canvas');
-          canvas.width=w;canvas.height=h;
-          canvas.getContext('2d').drawImage(img2,0,0,w,h);
-          const jpeg=canvas.toDataURL('image/jpeg',0.88);
-          imgB64=jpeg.split(',')[1];imgMime='image/jpeg';
-          document.getElementById('prev-img').src=jpeg;
-          document.getElementById('prev-w').style.display='block';
-          document.getElementById('photo-btns').style.display='none';
-          document.getElementById('scan-btn').disabled=false;
-          URL.revokeObjectURL(objURL);
-        };
-        img2.onerror=()=>{alert('No se pudo leer la imagen. Intenta con JPG o PNG.');URL.revokeObjectURL(objURL);};
-        img2.src=objURL;
-      };
-      img.src=dataUrl;
-    };
-    reader.onerror=()=>alert('Error leyendo el archivo.');
-    reader.readAsDataURL(file);
-  });
+  };
+  img.onerror=()=>{
+    // objectURL failed — browser can't decode this format at all
+    URL.revokeObjectURL(objURL);
+    showImgStatus('');
+    document.getElementById('photo-btns').style.display='grid';
+    alert('No se pudo leer esta imagen.\n\nFormatos compatibles: JPG, PNG, WebP, HEIC (iOS), BMP.\n\nSi es HEIC, asegúrate de abrir el app en Safari (iOS) o Chrome (Android).');
+  };
+  // objectURL works for HEIC in Safari iOS, Chrome Android, Chrome/Edge desktop
+  img.src=objURL;
+}
+
+function showImgStatus(msg){
+  let el=document.getElementById('img-status');
+  if(!el){
+    el=document.createElement('div');el.id='img-status';
+    el.style.cssText='text-align:center;padding:20px;color:var(--teal);font-size:13px;font-weight:600;';
+    document.getElementById('photo-btns').parentNode.insertBefore(el,document.getElementById('photo-btns').nextSibling);
+  }
+  el.textContent=msg;el.style.display=msg?'block':'none';
 }
 
 function changePhoto(){
@@ -562,42 +556,56 @@ function buildPersons(){
 function chQty(d){newQty=Math.max(1,Math.min(20,newQty+d));document.getElementById('qty-disp').textContent=newQty;}
 
 // ── SCAN ──
-async function startScan(){
-  if(!imgB64){alert('Primero selecciona una foto del recibo');return;}
+async async function startScan(){
+  if(!imgB64||imgB64.length<100){alert('La imagen no se procesó correctamente. Vuelve a seleccionarla.');return;}
   buildPersons();showV('v-scanning');
-  setTimeout(()=>markS('s1','s2'),700);setTimeout(()=>markS('s2','s3'),1700);
+  const lbl=document.getElementById('scan-provider-label');
+  if(lbl) lbl.textContent='Preparando OCR...';
   try{
-    const prompt=`Analiza este recibo de restaurante. Extrae TODOS los artículos con nombre y precio unitario.
-Responde ÚNICAMENTE con JSON array, sin texto extra, sin markdown:
-[{"name":"Nombre","price":12.50,"isAlcohol":false,"qty":1}]
-Reglas: excluye subtotal/tax/total/propina; isAlcohol:true para bebidas alcohólicas; price=precio unitario; qty=cantidad (default 1); solo el array.`;
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:imgMime,data:imgB64}},
-          {type:'text',text:prompt}]}]})
+    const byteChars=atob(imgB64);
+    const byteArr=new Uint8Array(byteChars.length);
+    for(let i=0;i<byteChars.length;i++) byteArr[i]=byteChars.charCodeAt(i);
+    const blob=new Blob([byteArr],{type:'image/jpeg'});
+    const imgUrl=URL.createObjectURL(blob);
+    const worker=await Tesseract.createWorker('spa+eng',1,{
+      logger:m=>{
+        if(m.status==='recognizing text'){
+          markS('s1','s2');
+          if(lbl) lbl.textContent='Reconociendo texto...';
+        }
+      }
     });
-    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${r.status}`);}
-    const d=await r.json();
-    const raw=d.content?.find(b=>b.type==='text')?.text||'[]';
-    let parsed=[];
-    try{
-      const clean=raw.replace(/```[\w]*\n?/g,'').replace(/```/g,'').trim();
-      const s=clean.indexOf('['),en=clean.lastIndexOf(']');
-      parsed=s!==-1&&en!==-1?JSON.parse(clean.slice(s,en+1)):JSON.parse(clean);
-    }catch(e){console.error('parse:',raw);parsed=[];}
+    markS('s1','s2');
+    const {data:{text}}=await worker.recognize(imgUrl);
+    await worker.terminate();
+    URL.revokeObjectURL(imgUrl);
+    markS('s2','s3');
+    if(lbl) lbl.textContent='Analizando líneas...';
+    const IGNORE=/subtotal|tax|iva|ivu|total|balance|change|cash|visa|mastercard|auth|approval|propina|tip|service|mesa|table|check|receipt|fecha|date|gracias|thank|server|cashier|cajero|orden|guest|phone|tel|www|http/i;
+    const ALCOHOL=/beer|cerveza|vino|wine|ron|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|champagne|sangria|mojito/i;
+    const PRICE=/[$]?\s*(\d{1,3}(?:[.]\d{2}))\s*$/;
+    const lines=text.split('\n').map(l=>l.trim().replace(/\s+/g,' ')).filter(Boolean);
     items=[];
-    parsed.forEach((it,i)=>{
-      const nl=(it.name||'').toLowerCase();
-      const isAlc=it.isAlcohol||ALC.some(k=>nl.includes(k));
-      const qty=Math.max(1,parseInt(it.qty)||1);
-      for(let q=0;q<qty;q++) items.push({id:Date.now()+i*100+q,name:it.name||'Artículo',price:parseFloat(it.price)||0,isAlcohol:isAlc,assignedTo:[]});
+    lines.forEach((line,idx)=>{
+      if(IGNORE.test(line)||line.length<3||/^\d+$/.test(line)) return;
+      const m=line.match(PRICE);
+      if(m){
+        const price=parseFloat(m[1]);
+        if(price<=0||price>999) return;
+        const name=line.slice(0,line.lastIndexOf(m[0])).replace(/[$]/g,'').trim();
+        if(name.length<2) return;
+        items.push({id:Date.now()+idx*100,name,price,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
+      }
     });
-    markS('s3');setTimeout(()=>initSplit(),350);
+    markS('s3');
+    if(items.length===0){
+      alert('No se detectaron artículos.\nVerifica que la foto sea clara e iluminada, o ingresa manualmente.');
+      buildPersons();initSplit();return;
+    }
+    setTimeout(()=>initSplit(),350);
   }catch(err){
-    console.error(err);
-    alert(`Error al leer el recibo: ${err.message}\n\nPuedes ingresar los artículos manualmente.`);
+    console.error('OCR error:',err);
+    alert('Error al leer el recibo.\nPuedes ingresar los artículos manualmente.');
     buildPersons();items=[];initSplit();
   }
 }
