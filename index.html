@@ -116,6 +116,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 .drop-zone{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;cursor:pointer;
   padding:6px 8px;border-radius:12px;border:2px dashed rgba(255,255,255,.12);min-width:62px;
   transition:all .2s;-webkit-user-select:none;user-select:none}
+.drop-zone *{pointer-events:none}
 .drop-zone.drag-over{border-color:var(--teal);background:var(--tdim);transform:scale(1.06)}
 .drop-zone.has-items{border-color:rgba(0,212,255,.3);border-style:solid}
 .dz-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:var(--mono);border:2px solid rgba(255,255,255,.14);transition:all .2s}
@@ -241,8 +242,17 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
   background:rgba(11,16,36,.95);border:1px solid var(--teal);border-radius:var(--rs);padding:10px 14px;
   font-family:var(--sans);font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;
   box-shadow:0 8px 32px rgba(0,212,255,.25);display:none}
+
+/* ── BACK BUTTON ── */
+.back-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--t2);font-size:13px;font-weight:600;padding:7px 12px;cursor:pointer;flex-shrink:0}
+.back-btn:active{background:rgba(255,255,255,.1)}
+.back-btn svg{flex-shrink:0}
+.view-topbar{display:flex;align-items:center;padding:10px 14px 0;gap:10px;flex-shrink:0}
+
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
+
+</script>
 </head>
 <body>
 <div id="bg"></div>
@@ -318,6 +328,12 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 
 <!-- SPLIT -->
 <div class="view" id="v-split">
+  <div class="view-topbar">
+    <button class="back-btn" onclick="backToUpload()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+      Volver
+    </button>
+  </div>
   <div class="sp-hdr">
     <div class="sp-top">
       <div><div class="sp-rest" id="sp-rest">Restaurante</div><div class="sp-dt" id="sp-dt"></div></div>
@@ -365,6 +381,12 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 
 <!-- RESULTS -->
 <div class="view" id="v-results">
+  <div class="view-topbar">
+    <button class="back-btn" onclick="backToSplit()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+      Volver
+    </button>
+  </div>
   <div class="rh">
     <h2 id="r-rest">Resultado</h2>
     <div class="rg" id="r-grand">$0.00</div>
@@ -583,7 +605,7 @@ async function startScan(){
     if(lbl) lbl.textContent='Analizando líneas...';
 
     // FIX 1: Expanded ignore list - catches PR tax types and totals
-    const IGNORE=/subtotal|sub total|sub-total|municipal tax|munincipal|reducido|estate tax|total tax|state tax|excise|iva|ivu|itbms|total|balance|balance due|change|cash|visa|mastercard|amex|discover|auth|approval|propina|gratuity|tip|service charge|service fee|mesa|table|check|receipt|fecha|date|gracias|thank|server|cashier|cajero|orden|order|guest|guests|phone|tel|fax|www|http|suggested|%\s*=/i;
+    const IGNORE=/^(subtotal|sub-total|total tax|total|balance due|balance|municipal tax|munincipal tax|reducido tax|estate tax|state tax|excise tax|iva|ivu|itbms|tax|change|cash due|visa|mastercard|amex|discover|auth|approval|gratuity|service charge|mesa|table|check #|receipt|server:|cashier|cajero|guests?:|phone|tel:|fax|www\.|http|tip is|gracias|thank you|suggested|\d+%\s*=)/i;
 
     const ALCOHOL=/beer|cerveza|vino|wine|ron|rum|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|liquor|champagne|sangria|mojito|mule|moscow|blond|ipa|lager|seltzer|pale ale|draft|draught|coors|budweiser|bud |heineken|smirnoff|baileys|kahlua|malibu|hennessy|jack daniel|patron|bacardi|jose cuervo/i;
 
@@ -674,7 +696,7 @@ function renderDropZones(){
     return`<div class="drop-zone ${cnt>0?'has-items':''}" id="dz-${p.id}"
       data-pid="${p.id}"
       ondragover="dzOver(event,${p.id})"
-      ondragleave="dzLeave(${p.id})"
+      ondragleave="dzLeave(${p.id},event)"
       ondrop="dzDrop(event,${p.id})"
       onclick="dzTap(${p.id})">
       <div class="dz-av ${p.color}">${p.label}</div>
@@ -697,8 +719,14 @@ function onDragEnd(id){
   document.getElementById('ic-'+id)?.classList.remove('dragging');
   dragId=null;
 }
-function dzOver(e,pid){e.preventDefault();document.getElementById('dz-'+pid)?.classList.add('drag-over');}
-function dzLeave(pid){document.getElementById('dz-'+pid)?.classList.remove('drag-over');}
+function dzOver(e,pid){e.preventDefault();e.stopPropagation();document.getElementById('dz-'+pid)?.classList.add('drag-over');}
+function dzLeave(pid,e){
+  const dz=document.getElementById('dz-'+pid);
+  if(!dz)return;
+  // Only remove drag-over if we truly left the drop zone (not just moved to a child)
+  if(e&&dz.contains(e.relatedTarget))return;
+  dz.classList.remove('drag-over');
+}
 function dzDrop(e,pid){
   e.preventDefault();dzLeave(pid);
   const id=parseInt(e.dataTransfer.getData('text/plain')||dragId);
@@ -721,7 +749,7 @@ function onTouchStart(e,id){
     ghost.textContent=item.name+' · $'+f(item.price);
     ghost.style.display='block';
     ghost.style.left=touchStartX+'px';ghost.style.top=touchStartY+'px';
-  },320);
+  },180);
 }
 let touchTimer=null;
 function onTouchMove(e){
@@ -994,6 +1022,19 @@ function escA(s){return(s||'').replace(/"/g,'&quot;');}
 // Enter key shortcuts
 document.getElementById('ni-price')?.addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
 document.getElementById('ni-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ni-price')?.focus();});
+
+// ── BACK NAVIGATION ──
+function backToUpload(){
+  if(items.length>0){
+    if(!confirm('¿Volver al inicio? Se perderán los artículos actuales.')) return;
+  }
+  items=[];persons=[];
+  showV('v-upload');
+}
+function backToSplit(){
+  showV('v-split');
+  renderDropZones();renderItems();updProgress();
+}
 </script>
 </body>
 </html>
