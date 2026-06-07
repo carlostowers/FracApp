@@ -461,7 +461,7 @@ const LABELS=['P1','P2','P3','P4','P5','P6'];
 const ALC=['beer','cerveza','wine','vino','rum','ron','whiskey','cocktail','margarita','sangria','licor','vodka','gin','tequila','corona','medalla','heineken','budweiser','coors','seltzer','mojito','piña colada','daiquiri','shot','shots','cava','champagne','prosecco','sake','pale ale','ipa','lager','stout','porter','draft','draught'];
 
 let persons=[],items=[],curItem=null,selPers=[];
-let tipPct=20,tipFix=null,tipMode='pct';
+let tipPct=0,tipFix=null,tipMode='pct';
 let imgB64=null,imgMime='image/jpeg';
 let pCount=2,newQty=1;
 let hist=JSON.parse(localStorage.getItem('sc_h')||'[]');
@@ -924,10 +924,12 @@ function confirmAssign(){
 
 // ── RESULTS ──
 function goResults(){
+  tipPct=0;tipFix=null;tipMode='pct';
+  document.getElementById('tip-fix').value='';
   showV('v-results');
   document.getElementById('r-rest').textContent=document.getElementById('rest-in').value||'Restaurante';
   document.getElementById('r-date').textContent=fmtDate(document.getElementById('date-in').value);
-  document.querySelectorAll('.tp').forEach(b=>b.classList.toggle('sel',parseInt(b.textContent)===tipPct));
+  document.querySelectorAll('.tp').forEach(b=>b.classList.remove('sel'));
   renderCards();
 }
 function setTip(p){tipPct=p;tipFix=null;tipMode='pct';document.getElementById('tip-fix').value='';document.querySelectorAll('.tp').forEach(b=>b.classList.toggle('sel',parseInt(b.textContent)===p));renderCards();}
