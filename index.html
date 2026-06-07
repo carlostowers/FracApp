@@ -490,8 +490,8 @@ function updateAIBadge(){
   if(scanBtn&&window.imgB64) scanBtn.disabled=false;
 }
 
-// ── INIT: show setup if no key, else upload ──
-(function init(){
+// ── INIT ──
+(function(){
   showV('v-upload');
   renderPNameInputs();
   document.getElementById('date-in').value=new Date().toISOString().split('T')[0];
