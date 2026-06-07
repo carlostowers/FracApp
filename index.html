@@ -556,7 +556,7 @@ function buildPersons(){
 function chQty(d){newQty=Math.max(1,Math.min(20,newQty+d));document.getElementById('qty-disp').textContent=newQty;}
 
 // ── SCAN ──
-async async function startScan(){
+async function startScan(){
   if(!imgB64||imgB64.length<100){alert('La imagen no se procesó correctamente. Vuelve a seleccionarla.');return;}
   buildPersons();showV('v-scanning');
   const lbl=document.getElementById('scan-provider-label');
