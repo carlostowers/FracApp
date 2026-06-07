@@ -556,7 +556,7 @@ function buildPersons(){
 function chQty(d){newQty=Math.max(1,Math.min(20,newQty+d));document.getElementById('qty-disp').textContent=newQty;}
 
 // ── SCAN ──
-async function startScan(){
+async async function startScan(){
   if(!imgB64||imgB64.length<100){alert('La imagen no se procesó correctamente. Vuelve a seleccionarla.');return;}
   buildPersons();showV('v-scanning');
   const lbl=document.getElementById('scan-provider-label');
@@ -581,13 +581,49 @@ async function startScan(){
     URL.revokeObjectURL(imgUrl);
     markS('s2','s3');
     if(lbl) lbl.textContent='Analizando líneas...';
-    const IGNORE=/subtotal|tax|iva|ivu|total|balance|change|cash|visa|mastercard|auth|approval|propina|tip|service|mesa|table|check|receipt|fecha|date|gracias|thank|server|cashier|cajero|orden|guest|phone|tel|www|http/i;
-    const ALCOHOL=/beer|cerveza|vino|wine|ron|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|champagne|sangria|mojito/i;
+
+    // FIX 1: Expanded ignore list - catches PR tax types and totals
+    const IGNORE=/subtotal|sub total|sub-total|municipal tax|munincipal|reducido|estate tax|total tax|state tax|excise|iva|ivu|itbms|total|balance|balance due|change|cash|visa|mastercard|amex|discover|auth|approval|propina|gratuity|tip|service charge|service fee|mesa|table|check|receipt|fecha|date|gracias|thank|server|cashier|cajero|orden|order|guest|guests|phone|tel|fax|www|http|suggested|%\s*=/i;
+
+    const ALCOHOL=/beer|cerveza|vino|wine|ron|rum|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|liquor|champagne|sangria|mojito|mule|moscow|blond|ipa|lager|seltzer|pale ale|draft|draught|coors|budweiser|bud |heineken|smirnoff|baileys|kahlua|malibu|hennessy|jack daniel|patron|bacardi|jose cuervo/i;
+
     const PRICE=/[$]?\s*(\d{1,3}(?:[.]\d{2}))\s*$/;
+
+    // FIX 2: Pattern for "name (qty @unit)" or "name qty @unit" → expand to qty items at unit price
+    // Matches: "Moscow Mule (2 @6.00)" or "Coke (2 @2.50)" or "Beer 3 @4.00"
+    const QTY_AT = /^(.+?)\s*\(?\s*(\d+)\s*@\s*(\d+(?:\.\d{2})?)\s*\)?/;
+
     const lines=text.split('\n').map(l=>l.trim().replace(/\s+/g,' ')).filter(Boolean);
     items=[];
-    lines.forEach((line,idx)=>{
-      if(IGNORE.test(line)||line.length<3||/^\d+$/.test(line)) return;
+    let idx=0;
+
+    lines.forEach((line)=>{
+      // Skip ignored lines first
+      if(line.length<3||/^\d+$/.test(line)) return;
+      if(IGNORE.test(line)) return;
+
+      // FIX 2: Check for qty@price pattern FIRST
+      const qm=line.match(QTY_AT);
+      if(qm){
+        const name=qm[1].trim();
+        const qty=parseInt(qm[2]);
+        const unitPrice=parseFloat(qm[3]);
+        if(name.length>=2&&qty>=1&&qty<=20&&unitPrice>0&&unitPrice<=999){
+          for(let q=0;q<qty;q++){
+            items.push({
+              id:Date.now()+idx*100+(q*7),
+              name:qty>1?`${name} (${q+1}/${qty})`:name,
+              price:unitPrice,
+              isAlcohol:ALCOHOL.test(name),
+              assignedTo:[]
+            });
+          }
+          idx++;
+          return; // handled
+        }
+      }
+
+      // Regular price detection
       const m=line.match(PRICE);
       if(m){
         const price=parseFloat(m[1]);
@@ -595,8 +631,10 @@ async function startScan(){
         const name=line.slice(0,line.lastIndexOf(m[0])).replace(/[$]/g,'').trim();
         if(name.length<2) return;
         items.push({id:Date.now()+idx*100,name,price,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
+        idx++;
       }
     });
+
     markS('s3');
     if(items.length===0){
       alert('No se detectaron artículos.\nVerifica que la foto sea clara e iluminada, o ingresa manualmente.');
