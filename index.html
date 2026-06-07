@@ -36,7 +36,7 @@ body{font-family:var(--sans);background:var(--navy);color:var(--text);overflow:h
   background:rgba(10,14,26,.93);border-top:1px solid var(--gb);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);flex-shrink:0}
 .nb{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--t3);
-  cursor:pointer;padding:5px 12px;border-radius:var(--rs);transition:all .2s;border:none;background:none}
+  cursor:pointer;padding:5px 16px;border-radius:var(--rs);transition:all .2s;border:none;background:none}
 .nb.on{color:var(--teal)}.nb:active{transform:scale(.93)}
 .ni{height:21px;display:flex;align-items:center;justify-content:center}
 
@@ -48,51 +48,24 @@ body{font-family:var(--sans);background:var(--navy);color:var(--text);overflow:h
 .bgl{background:var(--glass);color:var(--text);border:1px solid var(--gb)}.bgl:active{background:var(--gh);transform:scale(.97)}
 
 /* INPUTS */
-input[type=text],input[type=number],input[type=date],input[type=password],select{
+input[type=text],input[type=number],input[type=date]{
   background:rgba(255,255,255,.07);border:1px solid var(--gb);border-radius:var(--rx);
   color:var(--text);font-family:var(--sans);font-size:15px;padding:11px 12px;width:100%;
-  outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
-input:focus,select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,212,255,.09)}
+  outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,212,255,.09)}
 input::placeholder{color:var(--t3)}
 input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.4)}
-select option{background:#1a2540;color:var(--text)}
 label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px}
-
-/* ── SETUP VIEW ── */
-#v-setup{align-items:center;justify-content:center;padding:24px 20px}
-.setup-card{padding:24px;width:100%}
-.setup-logo{text-align:center;margin-bottom:22px}
-.setup-logo h1{font-size:26px;font-weight:900;letter-spacing:-1px}
-.setup-logo h1 .sc{color:var(--teal);text-shadow:var(--tglow)}
-.setup-logo p{font-size:12px;color:var(--t2);margin-top:5px}
-.setup-intro{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:18px;text-align:center}
-.provider-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-.prov-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;
-  background:var(--glass);border:1px solid var(--gb);border-radius:var(--rs);cursor:pointer;transition:all .18s}
-.prov-btn.sel{border-color:var(--teal);background:var(--tdim)}
-.prov-btn:active{transform:scale(.95)}
-.prov-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
-.prov-name{font-size:11px;font-weight:700;color:var(--t2)}
-.prov-btn.sel .prov-name{color:var(--teal)}
-.key-field{margin-bottom:14px}
-.key-hint{font-size:11px;color:var(--t3);margin-top:6px;line-height:1.5}
-.key-hint a{color:var(--teal);text-decoration:none}
-.setup-divider{display:flex;align-items:center;gap:10px;margin:14px 0}
-.setup-divider::before,.setup-divider::after{content:'';flex:1;height:1px;background:var(--gb)}
-.setup-divider span{font-size:11px;color:var(--t3)}
 
 /* UPLOAD */
 #v-upload{padding-bottom:0}
 .up-scroll{flex:1;overflow-y:auto;padding:14px;scrollbar-width:none;display:flex;flex-direction:column;gap:12px}
 .up-scroll::-webkit-scrollbar{display:none}
-.logo-w{display:flex;align-items:center;justify-content:space-between;padding:20px 14px 0}
-.logo-t{font-size:26px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+.logo-w{text-align:center;padding:24px 20px 2px;flex-shrink:0}
+.logo-t{font-size:29px;font-weight:900;letter-spacing:-1.5px;line-height:1}
 .logo-t .sc{color:var(--teal);text-shadow:var(--tglow)}
-.logo-t .pr{font-size:13px;color:var(--t3);font-weight:600;letter-spacing:0}
-.ai-badge{display:flex;align-items:center;gap:6px;background:var(--tdim);border:1px solid rgba(0,212,255,.25);border-radius:20px;padding:5px 10px;cursor:pointer;transition:all .15s}
-.ai-badge:active{background:var(--glass)}
-.ai-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--success)}
-.ai-badge-txt{font-size:11px;font-weight:700;color:var(--teal)}
+.logo-t .pr{font-size:14px;color:var(--t3);font-weight:600;letter-spacing:0}
+.logo-s{font-size:12px;color:var(--t2);margin-top:4px}
 .photo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:22px 12px;
   background:var(--glass);border:1px solid var(--gb);border-radius:var(--r);cursor:pointer;transition:all .18s;
@@ -126,7 +99,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* SPLIT */
+/* SPLIT HEADER */
 .sp-hdr{padding:13px 14px 10px;flex-shrink:0;background:rgba(10,14,26,.72);border-bottom:1px solid var(--gb);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .sp-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .sp-rest{font-size:15px;font-weight:800}
@@ -136,21 +109,28 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 .prog{height:3px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden;margin-bottom:3px}
 .pf{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:2px;transition:width .4s ease}
 .pt{font-size:10px;color:var(--t3);text-align:right}
+
+/* PERSONS DROP TARGETS */
 .drop-row{display:flex;gap:8px;padding:10px 14px 6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;background:rgba(10,14,26,.5)}
 .drop-row::-webkit-scrollbar{display:none}
 .drop-zone{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;cursor:pointer;
-  padding:6px 8px;border-radius:12px;border:2px dashed rgba(255,255,255,.12);min-width:62px;transition:all .2s;-webkit-user-select:none;user-select:none}
+  padding:6px 8px;border-radius:12px;border:2px dashed rgba(255,255,255,.12);min-width:62px;
+  transition:all .2s;-webkit-user-select:none;user-select:none}
 .drop-zone.drag-over{border-color:var(--teal);background:var(--tdim);transform:scale(1.06)}
 .drop-zone.has-items{border-color:rgba(0,212,255,.3);border-style:solid}
 .dz-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:var(--mono);border:2px solid rgba(255,255,255,.14);transition:all .2s}
 .dz-name{font-size:10px;font-weight:600;color:var(--t2);max-width:58px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .dz-amt{font-size:11px;font-weight:700;color:var(--teal);font-family:var(--mono)}
 .dz-count{font-size:9px;color:var(--teal);font-weight:700;margin-top:1px}
+
+/* ITEMS */
 .sl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;padding-left:1px}
 .ic{background:var(--glass);border:1px solid var(--gb);border-radius:var(--rs);padding:11px 12px;margin-bottom:6px;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all .2s;
   cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none}
-.ic:active{cursor:grabbing}.ic.dragging{opacity:.4;transform:scale(.97);border-style:dashed}.ic.assigned{opacity:.4;border-style:dashed}
+.ic:active{cursor:grabbing}
+.ic.dragging{opacity:.4;transform:scale(.97);border-style:dashed}
+.ic.assigned{opacity:.4;border-style:dashed}
 .ic-body{display:flex;align-items:flex-start;gap:7px}
 .il{flex:1;min-width:0}
 .in{font-size:13px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -163,15 +143,20 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 .eb:active{color:var(--teal)}
 .achips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .ac{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+/* drag handle indicator */
 .drag-hint{width:20px;height:3px;background:rgba(255,255,255,.18);border-radius:2px;margin:0 auto 6px}
+
+/* edit panel */
 .ie{display:none;border-top:1px solid var(--gb);margin-top:8px;padding-top:8px;gap:7px;flex-direction:column}
 .ie.open{display:flex}
 .er{display:grid;grid-template-columns:1fr 90px;gap:7px}
-.er input{padding:9px 10px;font-size:13px}
+.er input,.er2 input{padding:9px 10px;font-size:13px}
 .ea{display:flex;align-items:center;gap:9px}
 .alt{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;-webkit-user-select:none;user-select:none}
-.alt input{width:14px;height:14px;cursor:pointer;accent-color:var(--gold);flex-shrink:0}
+.alt input{width:14px;height:14px;cursor:pointer;accent-color:var(--gold)}
 .bdel{background:rgba(255,77,109,.12);color:var(--danger);border:1px solid rgba(255,77,109,.25);padding:7px 11px;width:auto;font-size:12px;border-radius:18px;cursor:pointer;font-family:var(--sans);font-weight:700;margin-left:auto}
+
+/* ADD BAR */
 .add-bar{background:rgba(0,212,255,.05);border:1px dashed rgba(0,212,255,.2);border-radius:var(--rs);padding:10px;margin-top:4px;margin-bottom:8px}
 .ab-r1{display:grid;grid-template-columns:1fr 88px;gap:7px;margin-bottom:7px}
 .ab-r2{display:flex;align-items:center;gap:7px;justify-content:space-between}
@@ -237,7 +222,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 .hh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
 .hr{font-size:14px;font-weight:700}
 .hd{font-size:11px;color:var(--t3);margin-top:2px}
-.htot{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--teal)}
+.ht{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--teal)}
 .hp{display:flex;flex-wrap:wrap;gap:5px}
 .hc{padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;background:var(--tdim);color:var(--teal);border:1px solid rgba(0,212,255,.17)}
 .hc.g{background:var(--gdim);color:var(--gold);border-color:rgba(245,197,24,.17)}
@@ -250,61 +235,24 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
 .av3{background:rgba(245,197,24,.18);color:var(--gold);border-color:rgba(245,197,24,.3)}
 .av4{background:rgba(167,139,250,.18);color:#A78BFA;border-color:rgba(167,139,250,.3)}
 .av5{background:rgba(251,146,60,.18);color:#FB923C;border-color:rgba(251,146,60,.3)}
-#drag-ghost{position:fixed;pointer-events:none;z-index:999;opacity:.88;transform:translate(-50%,-50%) rotate(2deg) scale(1.04);
+
+/* DRAG GHOST */
+#drag-ghost{position:fixed;pointer-events:none;z-index:999;opacity:.88;transform:translate(-50%,-50%) rotate(2deg) scale(1.04);transition:none;
   background:rgba(11,16,36,.95);border:1px solid var(--teal);border-radius:var(--rs);padding:10px 14px;
   font-family:var(--sans);font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;
   box-shadow:0 8px 32px rgba(0,212,255,.25);display:none}
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 <div id="bg"></div>
-<div id="drag-ghost"></div>
+<div id="drag-ghost" id="drag-ghost"></div>
 <div id="app">
 
-<!-- ══ SETUP (primera vez) ══ -->
-<div class="view" id="v-setup" style="display:none">
-  <div class="glass setup-card">
-    <div class="setup-logo">
-      <h1><span class="sc">Split</span><span style="color:var(--text)">Check</span> <span style="font-size:14px;color:var(--t3);font-weight:600">PR</span></h1>
-      <p>Configura tu proveedor de IA para leer recibos</p>
-    </div>
-    <p class="setup-intro">El app usa la IA que ya tienes. Selecciona tu proveedor y pega tu API key. Se guarda solo en tu dispositivo.</p>
-    <div class="provider-grid">
-      <div class="prov-btn sel" id="pb-anthropic" onclick="selProv('anthropic')">
-        <div class="prov-icon" style="background:rgba(205,127,50,.2);color:#cd7f32">A</div>
-        <div class="prov-name">Anthropic</div>
-      </div>
-      <div class="prov-btn" id="pb-openai" onclick="selProv('openai')">
-        <div class="prov-icon" style="background:rgba(16,163,127,.2);color:#10a37f">⊕</div>
-        <div class="prov-name">OpenAI</div>
-      </div>
-      <div class="prov-btn" id="pb-gemini" onclick="selProv('gemini')">
-        <div class="prov-icon" style="background:rgba(66,133,244,.2);color:#4285f4">G</div>
-        <div class="prov-name">Gemini</div>
-      </div>
-    </div>
-    <div class="key-field">
-      <label id="key-label">API Key de Anthropic</label>
-      <input type="password" id="key-input" placeholder="sk-ant-..." autocomplete="off">
-      <div class="key-hint" id="key-hint">
-        Obtén tu key en <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
-      </div>
-    </div>
-    <button class="btn bt" onclick="saveSetup()">Guardar y continuar</button>
-    <div class="setup-divider"><span>o</span></div>
-    <button class="btn bgl" onclick="skipSetup()" style="font-size:13px;padding:12px">Usar sin IA (manual)</button>
-  </div>
-</div>
-
-<!-- ══ UPLOAD ══ -->
-<div class="view" id="v-upload">
+<!-- UPLOAD -->
+<div class="view show" id="v-upload">
   <div class="logo-w">
     <div class="logo-t"><span class="sc">Split</span><span style="color:var(--text)">Check</span> <span class="pr">PR</span></div>
-    <div class="ai-badge" title="OCR Local">
-      <div class="ai-badge-dot" id="ai-dot" style="background:var(--success)"></div>
-      <div class="ai-badge-txt" id="ai-badge-txt">OCR</div>
-    </div>
+    <p class="logo-s">Divide cuentas de restaurante · Puerto Rico</p>
   </div>
   <div class="up-scroll">
     <div class="photo-row" id="photo-btns">
@@ -319,6 +267,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
     </div>
     <input type="file" id="inp-cam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
     <input type="file" id="inp-gal" accept="image/*,image/heic,image/heif,.heic,.heif" style="display:none" onchange="onFile(this)">
+
     <div class="prev-w" id="prev-w">
       <img id="prev-img" src="" alt="Recibo">
       <div class="prev-acts">
@@ -326,6 +275,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
         <span style="font-size:12px;color:var(--success);font-weight:700;margin-left:auto;align-self:center">✓ Lista</span>
       </div>
     </div>
+
     <div class="glass sc-card">
       <h3>Personas</h3>
       <div class="pc-row">
@@ -335,18 +285,19 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
       </div>
       <div id="pname-list"></div>
     </div>
+
     <div class="r2">
       <div><label>Restaurante</label><input type="text" id="rest-in" placeholder="Nombre..."></div>
       <div><label>Fecha</label><input type="date" id="date-in"></div>
     </div>
     <div class="bot-btns">
-      <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo</button>
+      <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo con IA</button>
       <button class="btn bgl" onclick="manualMode()" style="font-size:14px;padding:13px">Ingresar manualmente</button>
     </div>
   </div>
 </div>
 
-<!-- ══ SCANNING ══ -->
+<!-- SCANNING -->
 <div class="view" id="v-scanning">
   <div style="position:relative;width:74px;height:74px;flex-shrink:0">
     <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(0,212,255,.17)"></div>
@@ -356,15 +307,15 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
     </div>
   </div>
   <h2>Leyendo tu recibo...</h2>
-  <p id="scan-provider-label">Preparando OCR...</p>
+  <p>La IA está identificando los artículos</p>
   <div class="ss gs">
-    <div class="st on" id="s1"><div class="sd"></div>Preparando OCR</div>
+    <div class="st on" id="s1"><div class="sd"></div>Enviando imagen</div>
     <div class="st" id="s2"><div class="sd"></div>Reconociendo texto</div>
-    <div class="st" id="s3"><div class="sd"></div>Analizando líneas</div>
+    <div class="st" id="s3"><div class="sd"></div>Extrayendo artículos y precios</div>
   </div>
 </div>
 
-<!-- ══ SPLIT ══ -->
+<!-- SPLIT -->
 <div class="view" id="v-split">
   <div class="sp-hdr">
     <div class="sp-top">
@@ -374,9 +325,14 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
     <div class="prog"><div class="pf" id="pf" style="width:0%"></div></div>
     <div class="pt" id="pt">0 de 0 asignados</div>
   </div>
-  <div style="padding:7px 14px 3px;font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;background:rgba(10,14,26,.5)">Arrastra artículos aquí →</div>
+
+  <!-- DROP ZONES: drag items onto person avatars -->
+  <div style="padding:7px 14px 3px;font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;background:rgba(10,14,26,.5)">
+    Arrastra artículos aquí →
+  </div>
   <div class="drop-row" id="drop-row"></div>
-  <div class="scroll">
+
+  <div class="scroll" id="split-scroll">
     <div class="sl">Sin asignar — arrastra o toca para asignar</div>
     <div id="unassigned"></div>
     <div class="add-bar">
@@ -406,7 +362,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
   </div>
 </div>
 
-<!-- ══ RESULTS ══ -->
+<!-- RESULTS -->
 <div class="view" id="v-results">
   <div class="rh">
     <h2 id="r-rest">Resultado</h2>
@@ -422,7 +378,10 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
         <div class="tp sel" onclick="setTip(20)">20%<span>Excelente</span></div>
         <div class="tp" onclick="setTip(25)">25%<span>Wow</span></div>
       </div>
-      <div class="tcust"><label>Monto fijo $</label><input type="number" id="tip-fix" placeholder="0.00" step="0.01" oninput="setTipFix(this.value)"></div>
+      <div class="tcust">
+        <label>Monto fijo $</label>
+        <input type="number" id="tip-fix" placeholder="0.00" step="0.01" oninput="setTipFix(this.value)">
+      </div>
     </div>
     <div id="pcards"></div>
     <div style="height:14px"></div>
@@ -433,7 +392,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
   </div>
 </div>
 
-<!-- ══ HISTORY ══ -->
+<!-- HISTORY -->
 <div class="view" id="v-hist">
   <div style="padding:18px 14px 9px;flex-shrink:0;border-bottom:1px solid var(--gb)">
     <div style="font-size:18px;font-weight:800">Historial</div>
@@ -445,7 +404,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
   </div>
 </div>
 
-<!-- ══ MODAL ══ -->
+<!-- MODAL -->
 <div class="overlay" id="overlay" onclick="closeModal()"></div>
 <div class="modal" id="modal">
   <div class="mh"></div>
@@ -459,7 +418,7 @@ label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom
   </div>
 </div>
 
-<!-- ══ BOTTOM NAV ══ -->
+<!-- BOTTOM NAV -->
 <div class="bot-nav">
   <button class="nb on" id="nb-nueva" onclick="navTo('nueva')">
     <span class="ni"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>Nueva
@@ -480,22 +439,9 @@ const ALC=['beer','cerveza','wine','vino','rum','ron','whiskey','cocktail','marg
 
 let persons=[],items=[],curItem=null,selPers=[];
 let tipPct=20,tipFix=null,tipMode='pct';
-let imgB64=null;
+let imgB64=null,imgMime='image/jpeg';
 let pCount=2,newQty=1;
 let hist=JSON.parse(localStorage.getItem('sc_h')||'[]');
-
-// ── AI CONFIG ──
-function updateAIBadge(){
-  const scanBtn=document.getElementById('scan-btn');
-  if(scanBtn&&window.imgB64) scanBtn.disabled=false;
-}
-
-// ── INIT ──
-(function(){
-  showV('v-upload');
-  renderPNameInputs();
-  document.getElementById('date-in').value=new Date().toISOString().split('T')[0];
-})();
 
 // ── NAV ──
 function navTo(t){
@@ -506,48 +452,82 @@ function navTo(t){
   else exportCSV();
 }
 
-// ── FILE: objectURL first, always ──
+// ── FILE HANDLING: use createImageBitmap which works with HEIC on iOS ──
 function triggerCamera(){document.getElementById('inp-cam').click();}
 function triggerGallery(){document.getElementById('inp-gal').value='';document.getElementById('inp-gal').click();}
 
 function onFile(input){
-  const file=input.files[0];if(!file)return;
-  document.getElementById('photo-btns').style.display='none';
-  let statusEl=document.getElementById('img-status');
-  if(!statusEl){statusEl=document.createElement('div');statusEl.id='img-status';statusEl.style.cssText='text-align:center;padding:18px;color:var(--teal);font-size:13px;font-weight:600';document.getElementById('prev-w').before(statusEl);}
-  statusEl.textContent='Procesando imagen...';statusEl.style.display='block';
-
-  const objURL=URL.createObjectURL(file);
-  const img=new Image();
-  img.onload=()=>{
-    const w0=img.naturalWidth,h0=img.naturalHeight;
-    if(!w0||!h0){
-      cleanup();alert('El navegador no puede leer este formato. Usa JPG, PNG o WebP.');return;
-    }
-    const MAX=1800,scale=Math.min(1,MAX/Math.max(w0,h0));
-    const w=Math.round(w0*scale),h=Math.round(h0*scale);
-    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
-    canvas.getContext('2d').drawImage(img,0,0,w,h);
-    URL.revokeObjectURL(objURL);
+  const file=input.files[0];
+  if(!file) return;
+  // createImageBitmap handles HEIC natively on iOS 17+ without needing a data URL
+  createImageBitmap(file).then(bitmap=>{
+    const MAX=1800;
+    let w=bitmap.width, h=bitmap.height;
+    if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
+    const canvas=document.createElement('canvas');
+    canvas.width=w; canvas.height=h;
+    canvas.getContext('2d').drawImage(bitmap,0,0,w,h);
+    bitmap.close?.();
     const jpeg=canvas.toDataURL('image/jpeg',0.88);
-    if(!jpeg||jpeg==='data:,'){cleanup();alert('Error al convertir la imagen.');return;}
     imgB64=jpeg.split(',')[1];
+    imgMime='image/jpeg';
     document.getElementById('prev-img').src=jpeg;
     document.getElementById('prev-w').style.display='block';
-    statusEl.style.display='none';
-    updateAIBadge();
+    document.getElementById('photo-btns').style.display='none';
     document.getElementById('scan-btn').disabled=false;
-  };
-  img.onerror=()=>{
-    URL.revokeObjectURL(objURL);cleanup();
-    alert('No se pudo leer la imagen.\nFormatos compatibles: JPG, PNG, WebP, HEIC (iOS/macOS Safari), HEIC (Chrome Android).');
-  };
-  function cleanup(){statusEl.style.display='none';document.getElementById('photo-btns').style.display='grid';}
-  img.src=objURL;
+  }).catch(err=>{
+    // Fallback for browsers that don't support createImageBitmap with HEIC
+    // Try FileReader + Image element
+    console.warn('createImageBitmap failed, trying FileReader fallback:', err);
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const dataUrl=e.target.result;
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=1800;
+        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+        if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        const jpeg=canvas.toDataURL('image/jpeg',0.88);
+        imgB64=jpeg.split(',')[1];imgMime='image/jpeg';
+        document.getElementById('prev-img').src=jpeg;
+        document.getElementById('prev-w').style.display='block';
+        document.getElementById('photo-btns').style.display='none';
+        document.getElementById('scan-btn').disabled=false;
+      };
+      img.onerror=()=>{
+        // Last resort: use objectURL as src
+        const objURL=URL.createObjectURL(file);
+        const img2=new Image();
+        img2.onload=()=>{
+          const MAX=1800;
+          let w=img2.naturalWidth||1200,h=img2.naturalHeight||1600;
+          if(w>MAX||h>MAX){const s=MAX/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
+          const canvas=document.createElement('canvas');
+          canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(img2,0,0,w,h);
+          const jpeg=canvas.toDataURL('image/jpeg',0.88);
+          imgB64=jpeg.split(',')[1];imgMime='image/jpeg';
+          document.getElementById('prev-img').src=jpeg;
+          document.getElementById('prev-w').style.display='block';
+          document.getElementById('photo-btns').style.display='none';
+          document.getElementById('scan-btn').disabled=false;
+          URL.revokeObjectURL(objURL);
+        };
+        img2.onerror=()=>{alert('No se pudo leer la imagen. Intenta con JPG o PNG.');URL.revokeObjectURL(objURL);};
+        img2.src=objURL;
+      };
+      img.src=dataUrl;
+    };
+    reader.onerror=()=>alert('Error leyendo el archivo.');
+    reader.readAsDataURL(file);
+  });
 }
 
 function changePhoto(){
-  imgB64=null;
+  imgB64=null;imgMime='image/jpeg';
   document.getElementById('inp-cam').value='';document.getElementById('inp-gal').value='';
   document.getElementById('prev-w').style.display='none';
   document.getElementById('photo-btns').style.display='grid';
@@ -562,10 +542,14 @@ function renderPNameInputs(){
   c.innerHTML='';
   for(let i=0;i<pCount;i++){
     const r=document.createElement('div');r.className='pn-row';
-    r.innerHTML=`<div class="pav-sm ${COLORS[i]}">${LABELS[i]}</div><input type="text" placeholder="Persona ${i+1}" value="${old[i]||''}" id="pn-${i}">`;
+    r.innerHTML=`<div class="pav-sm ${COLORS[i]}">${LABELS[i]}</div>
+      <input type="text" placeholder="Persona ${i+1}" value="${old[i]||''}" id="pn-${i}">`;
     c.appendChild(r);
   }
 }
+renderPNameInputs();
+document.getElementById('date-in').value=new Date().toISOString().split('T')[0];
+
 function buildPersons(){
   persons=[];
   for(let i=0;i<pCount;i++){
@@ -577,61 +561,51 @@ function buildPersons(){
 // ── QTY ──
 function chQty(d){newQty=Math.max(1,Math.min(20,newQty+d));document.getElementById('qty-disp').textContent=newQty;}
 
-// ── SCAN: call correct API based on provider ──
-async async function startScan(){
-  if(!imgB64||imgB64.length<100){alert('La imagen no se procesó correctamente. Vuelve a seleccionarla.');return;}
+// ── SCAN ──
+async function startScan(){
+  if(!imgB64){alert('Primero selecciona una foto del recibo');return;}
   buildPersons();showV('v-scanning');
-  const lbl=document.getElementById('scan-provider-label');
-  if(lbl) lbl.textContent='Preparando OCR...';
+  setTimeout(()=>markS('s1','s2'),700);setTimeout(()=>markS('s2','s3'),1700);
   try{
-    const byteChars=atob(imgB64);
-    const byteArr=new Uint8Array(byteChars.length);
-    for(let i=0;i<byteChars.length;i++) byteArr[i]=byteChars.charCodeAt(i);
-    const blob=new Blob([byteArr],{type:'image/jpeg'});
-    const imgUrl=URL.createObjectURL(blob);
-    const worker=await Tesseract.createWorker('spa+eng',1,{
-      logger:m=>{
-        if(m.status==='recognizing text'){
-          markS('s1','s2');
-          if(lbl) lbl.textContent='Reconociendo texto...';
-        }
-      }
+    const prompt=`Analiza este recibo de restaurante. Extrae TODOS los artículos con nombre y precio unitario.
+Responde ÚNICAMENTE con JSON array, sin texto extra, sin markdown:
+[{"name":"Nombre","price":12.50,"isAlcohol":false,"qty":1}]
+Reglas: excluye subtotal/tax/total/propina; isAlcohol:true para bebidas alcohólicas; price=precio unitario; qty=cantidad (default 1); solo el array.`;
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:imgMime,data:imgB64}},
+          {type:'text',text:prompt}]}]})
     });
-    markS('s1','s2');
-    const {data:{text}}=await worker.recognize(imgUrl);
-    await worker.terminate();
-    URL.revokeObjectURL(imgUrl);
-    markS('s2','s3');
-    if(lbl) lbl.textContent='Analizando líneas...';
-    const IGNORE=/subtotal|tax|iva|ivu|total|balance|change|cash|visa|mastercard|auth|approval|propina|tip|service|mesa|table|check|receipt|fecha|date|gracias|thank|server|cashier|cajero|orden|guest|phone|tel|www|http/i;
-    const ALCOHOL=/beer|cerveza|vino|wine|ron|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|champagne|sangria|mojito/i;
-    const PRICE=/[$]?\s*(\d{1,3}(?:[.]\d{2}))\s*$/;
-    const lines=text.split('\n').map(l=>l.trim().replace(/\s+/g,' ')).filter(Boolean);
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${r.status}`);}
+    const d=await r.json();
+    const raw=d.content?.find(b=>b.type==='text')?.text||'[]';
+    let parsed=[];
+    try{
+      const clean=raw.replace(/```[\w]*\n?/g,'').replace(/```/g,'').trim();
+      const s=clean.indexOf('['),en=clean.lastIndexOf(']');
+      parsed=s!==-1&&en!==-1?JSON.parse(clean.slice(s,en+1)):JSON.parse(clean);
+    }catch(e){console.error('parse:',raw);parsed=[];}
     items=[];
-    lines.forEach((line,i)=>{
-      if(IGNORE.test(line)||line.length<3||/^\d+$/.test(line)) return;
-      const m=line.match(PRICE);
-      if(m){
-        const price=parseFloat(m[1]);
-        if(price<=0||price>999) return;
-        const name=line.slice(0,line.lastIndexOf(m[0])).replace(/[$]/g,'').trim();
-        if(name.length<2) return;
-        items.push({id:Date.now()+i*100,name,price,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
-      }
+    parsed.forEach((it,i)=>{
+      const nl=(it.name||'').toLowerCase();
+      const isAlc=it.isAlcohol||ALC.some(k=>nl.includes(k));
+      const qty=Math.max(1,parseInt(it.qty)||1);
+      for(let q=0;q<qty;q++) items.push({id:Date.now()+i*100+q,name:it.name||'Artículo',price:parseFloat(it.price)||0,isAlcohol:isAlc,assignedTo:[]});
     });
-    markS('s3');
-    if(items.length===0){
-      alert('No se detectaron artículos.\nVerifica que la foto sea clara e iluminada, o ingresa manualmente.');
-      buildPersons();initSplit();return;
-    }
-    setTimeout(()=>initSplit(),350);
+    markS('s3');setTimeout(()=>initSplit(),350);
   }catch(err){
-    console.error('OCR error:',err);
-    alert('Error al leer el recibo.\nPuedes ingresar los artículos manualmente.');
+    console.error(err);
+    alert(`Error al leer el recibo: ${err.message}\n\nPuedes ingresar los artículos manualmente.`);
     buildPersons();items=[];initSplit();
   }
 }
-function markS(dId,nId){const d=document.getElementById(dId);if(d){d.classList.remove('on');d.classList.add('done');}if(nId){const n=document.getElementById(nId);if(n)n.classList.add('on');}}
+function markS(dId,nId){
+  const d=document.getElementById(dId);
+  if(d){d.classList.remove('on');d.classList.add('done');}
+  if(nId){const n=document.getElementById(nId);if(n)n.classList.add('on');}
+}
 function manualMode(){buildPersons();items=[];initSplit();}
 
 // ── SPLIT ──
@@ -644,73 +618,122 @@ function initSplit(){
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
 }
+
+// ── DROP ZONES ──
 function renderDropZones(){
-  document.getElementById('drop-row').innerHTML=persons.map(p=>{
+  const c=document.getElementById('drop-row');
+  c.innerHTML=persons.map(p=>{
     const cnt=items.filter(i=>i.assignedTo.includes(p.id)).length;
     const amt=items.reduce((s,i)=>i.assignedTo.includes(p.id)?s+i.price/i.assignedTo.length:s,0);
-    return`<div class="drop-zone ${cnt>0?'has-items':''}" id="dz-${p.id}" data-pid="${p.id}"
-      ondragover="dzOver(event,${p.id})" ondragleave="dzLeave(${p.id})" ondrop="dzDrop(event,${p.id})">
+    return`<div class="drop-zone ${cnt>0?'has-items':''}" id="dz-${p.id}"
+      data-pid="${p.id}"
+      ondragover="dzOver(event,${p.id})"
+      ondragleave="dzLeave(${p.id})"
+      ondrop="dzDrop(event,${p.id})"
+      onclick="dzTap(${p.id})">
       <div class="dz-av ${p.color}">${p.label}</div>
       <div class="dz-name">${p.name}</div>
-      <div class="dz-amt">$${f2(amt)}</div>
+      <div class="dz-amt">$${f(amt)}</div>
       ${cnt>0?`<div class="dz-count">${cnt} art.</div>`:''}
     </div>`;
   }).join('');
 }
 
+// ── DRAG & DROP (Desktop HTML5) ──
 let dragId=null;
-function onDragStart(e,id){dragId=id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(id));setTimeout(()=>document.getElementById('ic-'+id)?.classList.add('dragging'),0);}
-function onDragEnd(id){document.getElementById('ic-'+id)?.classList.remove('dragging');dragId=null;}
+function onDragStart(e,id){
+  dragId=id;
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',String(id));
+  setTimeout(()=>document.getElementById('ic-'+id)?.classList.add('dragging'),0);
+}
+function onDragEnd(id){
+  document.getElementById('ic-'+id)?.classList.remove('dragging');
+  dragId=null;
+}
 function dzOver(e,pid){e.preventDefault();document.getElementById('dz-'+pid)?.classList.add('drag-over');}
 function dzLeave(pid){document.getElementById('dz-'+pid)?.classList.remove('drag-over');}
-function dzDrop(e,pid){e.preventDefault();dzLeave(pid);const id=parseInt(e.dataTransfer.getData('text/plain')||dragId);if(!isNaN(id))assignTo(id,pid);}
+function dzDrop(e,pid){
+  e.preventDefault();dzLeave(pid);
+  const id=parseInt(e.dataTransfer.getData('text/plain')||dragId);
+  if(isNaN(id))return;
+  assignItemToPerson(id,pid);
+}
 
-let touchDragId=null,ghost=null,touchSX=0,touchSY=0,moved=false,tTimer=null;
+// ── TOUCH DRAG (Mobile) ──
+let touchDragId=null,ghost=null,touchStartY=0,touchStartX=0,movedEnough=false;
+
 function onTouchStart(e,id){
-  touchDragId=id;moved=false;touchSX=e.touches[0].clientX;touchSY=e.touches[0].clientY;
-  tTimer=setTimeout(()=>{
-    const item=items.find(i=>i.id===id);if(!item)return;moved=true;
+  touchDragId=id;movedEnough=false;
+  touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;
+  // Long-press to start drag
+  touchTimer=setTimeout(()=>{
+    const item=items.find(i=>i.id===id);if(!item)return;
+    movedEnough=true;
     document.getElementById('ic-'+id)?.classList.add('dragging');
-    ghost=document.getElementById('drag-ghost');ghost.textContent=item.name+' · $'+f2(item.price);
-    ghost.style.display='block';ghost.style.left=touchSX+'px';ghost.style.top=touchSY+'px';
+    ghost=document.getElementById('drag-ghost');
+    ghost.textContent=item.name+' · $'+f(item.price);
+    ghost.style.display='block';
+    ghost.style.left=touchStartX+'px';ghost.style.top=touchStartY+'px';
   },320);
 }
+let touchTimer=null;
 function onTouchMove(e){
   if(!touchDragId)return;
   const t=e.touches[0];
-  if(Math.abs(t.clientX-touchSX)>8||Math.abs(t.clientY-touchSY)>8) clearTimeout(tTimer);
-  if(!moved)return;
+  const dx=Math.abs(t.clientX-touchStartX),dy=Math.abs(t.clientY-touchStartY);
+  if(dx>8||dy>8){clearTimeout(touchTimer);}
+  if(!movedEnough)return;
   e.preventDefault();
   if(ghost){ghost.style.left=t.clientX+'px';ghost.style.top=t.clientY+'px';}
+  // Highlight drop zone under finger
   document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('drag-over'));
-  document.elementFromPoint(t.clientX,t.clientY)?.closest('.drop-zone')?.classList.add('drag-over');
+  const el=document.elementFromPoint(t.clientX,t.clientY);
+  const dz=el?.closest('.drop-zone');if(dz)dz.classList.add('drag-over');
 }
 function onTouchEnd(e){
-  clearTimeout(tTimer);if(ghost){ghost.style.display='none';ghost=null;}
+  clearTimeout(touchTimer);
+  if(ghost){ghost.style.display='none';ghost=null;}
   document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('drag-over'));
-  if(!moved||!touchDragId){touchDragId=null;return;}
+  if(!movedEnough||!touchDragId){touchDragId=null;return;}
   const t=e.changedTouches[0];
-  const dz=document.elementFromPoint(t.clientX,t.clientY)?.closest('.drop-zone');
-  if(dz) assignTo(touchDragId,parseInt(dz.dataset.pid));
+  const el=document.elementFromPoint(t.clientX,t.clientY);
+  const dz=el?.closest('.drop-zone');
+  if(dz){
+    const pid=parseInt(dz.dataset.pid);
+    assignItemToPerson(touchDragId,pid);
+  }
   document.getElementById('ic-'+touchDragId)?.classList.remove('dragging');
-  touchDragId=null;moved=false;
+  touchDragId=null;movedEnough=false;
 }
 document.addEventListener('touchmove',onTouchMove,{passive:false});
 document.addEventListener('touchend',onTouchEnd);
 
-function assignTo(itemId,pid){
+function assignItemToPerson(itemId,pid){
   const item=items.find(i=>i.id===itemId);if(!item)return;
   if(!item.assignedTo.includes(pid)) item.assignedTo.push(pid);
   renderItems();renderDropZones();updProgress();
 }
+
+// tap on drop zone opens modal to assign all unassigned
+function dzTap(pid){
+  // pick first unassigned item and assign to this person in one tap? 
+  // Actually open the first unassigned item modal with this person pre-selected
+  const unassigned=items.filter(i=>i.assignedTo.length===0);
+  if(!unassigned.length)return;
+  // Just show a tip — drag is the primary UX, tap on item for multi-assign
+}
+
 function isAlcN(n){return ALC.some(k=>n.toLowerCase().includes(k));}
 
 function itemHTML(item,assigned){
   const chips=item.assignedTo.map(pid=>{const p=persons.find(x=>x.id===pid);return p?`<span class="ac ${p.color}">${p.label} ${p.name}</span>`:''}).join('');
   const alc=item.isAlcohol||isAlcN(item.name);
   const eico=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
-  return`<div class="ic ${assigned?'assigned':''}" id="ic-${item.id}" draggable="true"
-    ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd(${item.id})"
+  return`<div class="ic ${assigned?'assigned':''}" id="ic-${item.id}"
+    draggable="true"
+    ondragstart="onDragStart(event,${item.id})"
+    ondragend="onDragEnd(${item.id})"
     ontouchstart="onTouchStart(event,${item.id})">
     <div class="drag-hint"></div>
     <div class="ic-body" onclick="openModal(${item.id})">
@@ -720,7 +743,7 @@ function itemHTML(item,assigned){
         ${assigned?`<div class="achips">${chips}</div>`:''}
       </div>
       <div class="ir">
-        <span class="ip">$${f2(item.price)}</span>
+        <span class="ip">$${f(item.price)}</span>
         <button class="eb" onclick="event.stopPropagation();togEdit(${item.id})">${eico}</button>
       </div>
     </div>
@@ -736,13 +759,20 @@ function itemHTML(item,assigned){
     </div>
   </div>`;
 }
+
 function togEdit(id){document.getElementById('ie-'+id)?.classList.toggle('open');}
-function updF(id,field,val){
-  const item=items.find(i=>i.id===id);if(!item)return;item[field]=val;
-  if(field==='price'){const el=document.querySelector('#ic-'+id+' .ip');if(el)el.textContent='$'+f2(val);updAmts();updProgress();}
-  if(field==='name'||field==='isAlcohol'){const alc=item.isAlcohol||isAlcN(item.name);const b=document.querySelector('#ic-'+id+' .ib');if(b){b.className=alc?'ib bal':'ib bfd';b.textContent=alc?'Alcohol · 11.5%':'Comida · 7%';}}
+function updF(id,f,v){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  item[f]=v;
+  if(f==='price'){const el=document.querySelector('#ic-'+id+' .ip');if(el)el.textContent='$'+f2(v);updAmts();updProgress();}
+  if(f==='name'||f==='isAlcohol'){
+    const alc=item.isAlcohol||isAlcN(item.name);
+    const b=document.querySelector('#ic-'+id+' .ib');
+    if(b){b.className=alc?'ib bal':'ib bfd';b.textContent=alc?'Alcohol · 11.5%':'Comida · 7%';}
+  }
 }
 function delItem(id){items=items.filter(i=>i.id!==id);renderItems();renderDropZones();updProgress();}
+
 function addItem(){
   const name=document.getElementById('ni-name').value.trim();
   const price=parseFloat(document.getElementById('ni-price').value)||0;
@@ -750,36 +780,45 @@ function addItem(){
   if(!name&&!price)return;
   for(let q=0;q<newQty;q++) items.unshift({id:Date.now()+q,name:name||'Artículo',price,isAlcohol:isAlc,assignedTo:[]});
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
-  document.getElementById('ni-alc').checked=false;newQty=1;document.getElementById('qty-disp').textContent='1';
-  renderItems();renderDropZones();updProgress();document.getElementById('ni-name').focus();
+  document.getElementById('ni-alc').checked=false;
+  newQty=1;document.getElementById('qty-disp').textContent='1';
+  renderItems();renderDropZones();updProgress();
+  document.getElementById('ni-name').focus();
 }
+
 function renderItems(){
-  const un=items.filter(i=>i.assignedTo.length===0);const as=items.filter(i=>i.assignedTo.length>0);
-  document.getElementById('unassigned').innerHTML=un.length?un.map(i=>itemHTML(i,false)).join(''):`<div class="all-done">Todos los artículos asignados</div>`;
+  const un=items.filter(i=>i.assignedTo.length===0);
+  const as=items.filter(i=>i.assignedTo.length>0);
+  document.getElementById('unassigned').innerHTML=un.length
+    ?un.map(i=>itemHTML(i,false)).join('')
+    :`<div class="all-done">Todos los artículos asignados</div>`;
   document.getElementById('assigned').innerHTML=as.map(i=>itemHTML(i,true)).join('');
   document.getElementById('assigned-sec').style.display=as.length?'block':'none';
   updAmts();
 }
 function updAmts(){
+  // update drop zone amounts
   persons.forEach(p=>{
     const t=items.reduce((s,i)=>i.assignedTo.includes(p.id)?s+i.price/i.assignedTo.length:s,0);
     const cnt=items.filter(i=>i.assignedTo.includes(p.id)).length;
-    const dz=document.getElementById('dz-'+p.id);if(!dz)return;
-    const a=dz.querySelector('.dz-amt');if(a)a.textContent='$'+f2(t);
-    let cc=dz.querySelector('.dz-count');
-    if(cnt>0&&!cc){cc=document.createElement('div');cc.className='dz-count';dz.appendChild(cc);}
-    if(cc)cc.textContent=cnt>0?cnt+' art.':'';
+    const dz=document.getElementById('dz-'+p.id);
+    if(!dz)return;
+    const amtEl=dz.querySelector('.dz-amt');if(amtEl)amtEl.textContent='$'+f2(t);
+    const cntEl=dz.querySelector('.dz-count');
+    if(cnt>0&&!cntEl){const d=document.createElement('div');d.className='dz-count';d.textContent=cnt+' art.';dz.appendChild(d);}
+    else if(cntEl)cntEl.textContent=cnt>0?cnt+' art.':'';
     dz.classList.toggle('has-items',cnt>0);
   });
 }
 function updProgress(){
-  const total=items.filter(i=>i.price>0).length,done=items.filter(i=>i.price>0&&i.assignedTo.length>0).length;
+  const total=items.filter(i=>i.price>0).length;
+  const done=items.filter(i=>i.price>0&&i.assignedTo.length>0).length;
   document.getElementById('pf').style.width=(total>0?(done/total)*100:0)+'%';
   document.getElementById('pt').textContent=`${done} de ${total} asignados`;
   document.getElementById('sp-tot').textContent='$'+f2(items.reduce((s,i)=>s+(i.price>0?i.price:0),0));
 }
 
-// ── MODAL ──
+// ── MODAL (tap fallback / multi-person) ──
 function openModal(itemId){
   const item=items.find(i=>i.id===itemId);if(!item)return;
   curItem=itemId;selPers=[...item.assignedTo];
@@ -787,17 +826,27 @@ function openModal(itemId){
   document.getElementById('m-price').textContent='$'+f2(item.price);
   document.getElementById('m-pers').innerHTML=persons.map(p=>`
     <div class="mpb ${selPers.includes(p.id)?'sel':''}" data-pid="${p.id}" onclick="togMP(${p.id})">
-      <div class="mpa ${p.color}">${p.label}</div><span class="mps">${p.name}</span>
+      <div class="mpa ${p.color}">${p.label}</div>
+      <span class="mps">${p.name}</span>
       <div class="mpc">${selPers.includes(p.id)?'✓':''}</div>
     </div>`).join('');
-  document.getElementById('modal').classList.add('open');document.getElementById('overlay').classList.add('show');
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
 }
 function togMP(pid){
-  const i=selPers.indexOf(pid);if(i>-1)selPers.splice(i,1);else selPers.push(pid);
-  document.querySelectorAll('.mpb').forEach(b=>{const id=parseInt(b.dataset.pid),s=selPers.includes(id);b.classList.toggle('sel',s);b.querySelector('.mpc').textContent=s?'✓':'';});
+  const i=selPers.indexOf(pid);
+  if(i>-1)selPers.splice(i,1);else selPers.push(pid);
+  document.querySelectorAll('.mpb').forEach(b=>{
+    const id=parseInt(b.dataset.pid),s=selPers.includes(id);
+    b.classList.toggle('sel',s);b.querySelector('.mpc').textContent=s?'✓':'';
+  });
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('overlay').classList.remove('show');curItem=null;selPers=[];}
-function confirmAssign(){const item=items.find(i=>i.id===curItem);if(item)item.assignedTo=[...selPers];closeModal();renderItems();renderDropZones();updProgress();}
+function confirmAssign(){
+  const item=items.find(i=>i.id===curItem);
+  if(item)item.assignedTo=[...selPers];
+  closeModal();renderItems();renderDropZones();updProgress();
+}
 
 // ── RESULTS ──
 function goResults(){
@@ -814,22 +863,31 @@ function calcRes(){
   const tot=tipMode==='fix'&&tipFix!==null?tipFix:sub*(tipPct||0)/100;
   const ps=persons.map(p=>{
     let fs=0,as=0;const mi=[];
-    items.forEach(i=>{if(!i.assignedTo.includes(p.id))return;const sh=i.price/i.assignedTo.length;const alc=i.isAlcohol||isAlcN(i.name);if(alc)as+=sh;else fs+=sh;mi.push({name:i.name,share:sh,isAlcohol:alc});});
+    items.forEach(i=>{
+      if(!i.assignedTo.includes(p.id))return;
+      const sh=i.price/i.assignedTo.length;
+      const alc=i.isAlcohol||isAlcN(i.name);
+      if(alc)as+=sh;else fs+=sh;
+      mi.push({name:i.name,share:sh,isAlcohol:alc});
+    });
     const ms=fs+as,ft=fs*.07,at=as*.115,ts=sub>0?tot*(ms/sub):0;
     return{...p,fs,as,ft,at,ts,total:ms+ft+at+ts,mi};
   });
   return{ps,grand:ps.reduce((s,p)=>s+p.total,0),tot};
 }
 function renderCards(){
-  const{ps,grand}=calcRes();document.getElementById('r-grand').textContent='$'+f2(grand);
+  const{ps,grand}=calcRes();
+  document.getElementById('r-grand').textContent='$'+f2(grand);
   document.getElementById('pcards').innerHTML=ps.map(p=>{
     if(p.total<0.01)return'';
-    return`<div class="glass pc"><div class="ph"><div class="pav ${p.color}">${p.label}</div><div class="pnm">${p.name}</div><div class="ptot">$${f2(p.total)}</div></div>
+    return`<div class="glass pc">
+      <div class="ph"><div class="pav ${p.color}">${p.label}</div><div class="pnm">${p.name}</div><div class="ptot">$${f2(p.total)}</div></div>
       ${p.mi.map(i=>`<div class="pi"><span>${escH(i.name)}${i.isAlcohol?' ·alc':''}</span><span>$${f2(Math.max(0,i.share))}</span></div>`).join('')}
       ${p.fs>0?`<div class="pl"><span>Tax comida (7%)</span><span>$${f2(p.ft)}</span></div>`:''}
       ${p.as>0?`<div class="pl"><span>Tax alcohol (11.5%)</span><span>$${f2(p.at)}</span></div>`:''}
       ${p.ts>0.01?`<div class="pl"><span>Propina${tipPct?` (${tipPct}%)`:''}</span><span>$${f2(p.ts)}</span></div>`:''}
-      <div class="pl tot"><span>Total</span><span style="color:var(--teal)">$${f2(p.total)}</span></div></div>`;
+      <div class="pl tot"><span>Total</span><span style="color:var(--teal)">$${f2(p.total)}</span></div>
+    </div>`;
   }).join('');
 }
 
@@ -837,8 +895,14 @@ function renderCards(){
 function renderHist(){
   const c=document.getElementById('hist-list');
   if(!hist.length){c.innerHTML=`<div class="he"><div style="font-size:36px;opacity:.25;margin-bottom:10px">○</div><div style="font-size:14px;font-weight:700;margin-bottom:4px">Sin visitas aún</div><div style="font-size:12px">Completa una cuenta y guárdala</div></div>`;return;}
-  c.innerHTML=hist.map(e=>`<div class="glass hi"><div class="hh"><div><div class="hr">${e.restaurant}</div><div class="hd">${fmtDate(e.date)}</div></div><div class="htot">$${f2(e.grandTotal)}</div></div>
-    <div class="hp">${e.persons.filter(p=>p.total>0).map(p=>`<span class="hc">${p.name}: $${f2(p.total)}</span>`).join('')}${e.tipTotal>0?`<span class="hc g">Propina: $${f2(e.tipTotal)}</span>`:''}</div></div>`).join('');
+  c.innerHTML=hist.map(e=>`
+    <div class="glass hi">
+      <div class="hh"><div><div class="hr">${e.restaurant}</div><div class="hd">${fmtDate(e.date)}</div></div><div class="ht">$${f2(e.grandTotal)}</div></div>
+      <div class="hp">
+        ${e.persons.filter(p=>p.total>0).map(p=>`<span class="hc">${p.name}: $${f2(p.total)}</span>`).join('')}
+        ${e.tipTotal>0?`<span class="hc g">Propina: $${f2(e.tipTotal)}</span>`:''}
+      </div>
+    </div>`).join('');
 }
 
 // ── SAVE ──
@@ -848,33 +912,42 @@ function saveNew(){
     restaurant:document.getElementById('rest-in').value||'Restaurante',
     persons:ps.map(p=>({name:p.name,total:p.total})),tipTotal:tot,grandTotal:grand});
   localStorage.setItem('sc_h',JSON.stringify(hist));
-  items=[];persons=[];imgB64=null;
+  items=[];persons=[];imgB64=null;imgMime='image/jpeg';
   document.getElementById('rest-in').value='';
   document.getElementById('date-in').value=new Date().toISOString().split('T')[0];
   document.getElementById('prev-w').style.display='none';
   document.getElementById('photo-btns').style.display='grid';
   document.getElementById('scan-btn').disabled=true;
   document.getElementById('inp-cam').value='';document.getElementById('inp-gal').value='';
-  pCount=2;document.getElementById('cnt').textContent=2;tipPct=20;tipFix=null;tipMode='pct';
+  pCount=2;document.getElementById('cnt').textContent=2;
+  tipPct=20;tipFix=null;tipMode='pct';
   renderPNameInputs();navTo('nueva');
 }
+
 const PNAMES=['Persona 1','Persona 2','Persona 3','Persona 4','Persona 5','Persona 6'];
 function exportCSV(){
   if(!hist.length){alert('Guarda al menos una cuenta primero');return;}
   const h=['Fecha','Restaurante',...PNAMES,'Propina ($)','Total'];
-  const rows=hist.map(e=>{const a=PNAMES.map((_,i)=>{const p=e.persons[i];return p?f2(p.total):'0.00';});return[e.date,`"${e.restaurant}"`,...a,f2(e.tipTotal||0),f2(e.grandTotal)].join(',');});
+  const rows=hist.map(e=>{
+    const a=PNAMES.map((_,i)=>{const p=e.persons[i];return p?f2(p.total):'0.00';});
+    return[e.date,`"${e.restaurant}"`,...a,f2(e.tipTotal||0),f2(e.grandTotal)].join(',');
+  });
   const blob=new Blob(['\uFEFF'+[h.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='SplitCheck_PR.csv';a.click();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='SplitCheck_PR.csv';a.click();URL.revokeObjectURL(url);
 }
+
+// ── UTILS ──
 function showV(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id===id));const el=document.getElementById(id);if(el){const s=el.querySelector('.scroll');if(s)s.scrollTop=0;}}
 function f2(n){return parseFloat(n||0).toFixed(2);}
+// Override f to avoid conflict with local var
+function f(n){return parseFloat(n||0).toFixed(2);}
 function fmtDate(d){if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;}
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escA(s){return(s||'').replace(/"/g,'&quot;');}
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('ni-price')?.addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
-  document.getElementById('ni-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ni-price')?.focus();});
-});
+// Enter key shortcuts
+document.getElementById('ni-price')?.addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
+document.getElementById('ni-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ni-price')?.focus();});
 </script>
 </body>
 </html>
