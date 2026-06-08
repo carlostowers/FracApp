@@ -974,6 +974,113 @@ label {
   display: block;
 }
 
+
+/* ─── 3-BUTTON PHOTO ROW ─── */
+.photo-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+.pbtn-scan {
+  grid-column: 1 / -1; /* full width — primary action */
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 20px 16px;
+  background: rgba(201,168,76,.08);
+  border: 1px solid rgba(201,168,76,.30);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 200ms var(--ease-out);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 1px 0 rgba(201,168,76,.10) inset, 0 8px 32px rgba(0,0,0,.20);
+}
+.pbtn-scan:hover {
+  background: rgba(201,168,76,.13);
+  border-color: rgba(201,168,76,.50);
+  box-shadow: 0 0 0 1px rgba(201,168,76,.28), 0 8px 32px rgba(201,168,76,.12), 0 1px 0 rgba(201,168,76,.16) inset;
+}
+.pbtn-scan:active { transform: scale(.97); }
+.pbtn-scan .scan-icon-wrap {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(201,168,76,.14);
+  border: 1px solid rgba(201,168,76,.25);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.pbtn-scan .scan-text { text-align: left; }
+.pbtn-scan .scan-title { font-size: 14px; font-weight: 700; color: var(--gold-l); display: block; }
+.pbtn-scan .scan-sub   { font-size: 11px; color: var(--t3); display: block; margin-top: 2px; }
+.pbtn-sm {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 7px; padding: 16px 8px;
+  background: var(--g);
+  border: 1px solid var(--gb);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 200ms var(--ease-out);
+}
+.pbtn-sm:hover { background: var(--gh); border-color: rgba(201,168,76,.28); }
+.pbtn-sm:active { transform: scale(.96); }
+.pbtn-sm svg { color: var(--t2); transition: color 150ms; }
+.pbtn-sm:hover svg { color: var(--gold); }
+.pbtn-sm span { font-size: 11px; font-weight: 600; color: var(--t3); }
+
+/* ─── RECEIPT OVERLAY (tap-to-add) ─── */
+.receipt-overlay-wrap {
+  position: relative;
+  cursor: crosshair;
+  touch-action: none;
+}
+.receipt-overlay-wrap img {
+  width: 100%; border-radius: var(--r-sm);
+  border: 1px solid rgba(201,168,76,.20);
+  max-height: 280px; object-fit: contain;
+  background: #000; display: block;
+  pointer-events: none;
+}
+.receipt-tap-hint {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  background: rgba(8,7,6,.82); border: 1px solid rgba(201,168,76,.22);
+  border-radius: 99px; padding: 4px 12px;
+  font-size: 10px; font-weight: 600; color: var(--gold-l);
+  letter-spacing: .04em; white-space: nowrap;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  animation: fadeHint 3s ease 1.5s forwards;
+  opacity: 1;
+}
+@keyframes fadeHint { to { opacity: 0; } }
+.receipt-tap-marker {
+  position: absolute;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(201,168,76,.25);
+  border: 2px solid var(--gold);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: markerPop .25s var(--ease-spring) forwards;
+}
+@keyframes markerPop { from { transform: translate(-50%,-50%) scale(0); } to { transform: translate(-50%,-50%) scale(1); } }
+
+/* ─── TAP-TO-ADD POPUP ─── */
+.tap-popup {
+  position: fixed; z-index: 300;
+  background: rgba(12,10,8,.97);
+  border: 1px solid rgba(201,168,76,.28);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  width: min(280px, 90vw);
+  box-shadow: 0 8px 40px rgba(0,0,0,.55), 0 1px 0 rgba(201,168,76,.14) inset;
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  animation: vIn .2s var(--ease-out);
+  display: none;
+}
+.tap-popup.show { display: block; }
+.tap-popup-title {
+  font-size: 11px; font-weight: 700; color: var(--gold);
+  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px;
+}
+.tap-popup-row { display: grid; grid-template-columns: 1fr 80px; gap: 7px; margin-bottom: 8px; }
+.tap-popup-row input { padding: 9px 10px; font-size: 13px; }
+.tap-popup-alc { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--t2); margin-bottom: 10px; cursor: pointer; -webkit-user-select:none; user-select:none; }
+.tap-popup-alc input { width: 14px; height: 14px; accent-color: var(--gold-l); cursor: pointer; }
+.tap-popup-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -1009,17 +1116,33 @@ label {
   </div>
 
   <div class="up-scroll">
-    <div class="photo-row" id="photo-btns">
-      <div class="pbtn" onclick="triggerCamera()">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    <div class="photo-row-3" id="photo-btns">
+      <!-- Primary: Document Scanner (iOS native) -->
+      <div class="pbtn-scan" onclick="triggerScan()">
+        <div class="scan-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3H3v4"/><path d="M19 3h2v4"/><path d="M5 21H3v-4"/><path d="M19 21h2v-4"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+        </div>
+        <div class="scan-text">
+          <span class="scan-title" id="scan-doc-lbl">Escanear recibo</span>
+          <span class="scan-sub" id="scan-doc-sub">Imagen limpia y precisa</span>
+        </div>
+      </div>
+      <!-- Secondary: regular camera -->
+      <div class="pbtn-sm" onclick="triggerCamera()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <span id="cam-lbl">Cámara</span>
       </div>
-      <div class="pbtn" onclick="triggerGallery()">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      <!-- Secondary: gallery -->
+      <div class="pbtn-sm" onclick="triggerGallery()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
         <span id="gal-lbl">Galería</span>
       </div>
     </div>
+    <!-- Scanner input: no capture attr → iOS shows full menu incl. "Scan Documents" -->
+    <input type="file" id="inp-scan" accept="image/*,application/pdf" style="display:none" onchange="onFile(this)">
+    <!-- Camera input -->
     <input type="file" id="inp-cam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
+    <!-- Gallery input -->
     <input type="file" id="inp-gal" accept="image/*,image/heic,image/heif,.heic,.heif" style="display:none" onchange="onFile(this)">
 
     <div class="prev-w" id="prev-w">
@@ -1107,7 +1230,10 @@ label {
       <svg class="receipt-ref-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
     <div class="receipt-ref-img-wrap">
-      <img id="receipt-ref-img" src="" alt="Recibo">
+      <div class="receipt-overlay-wrap" id="receipt-overlay" onclick="onReceiptTap(event)">
+        <img id="receipt-ref-img" src="" alt="Recibo">
+        <div class="receipt-tap-hint" id="receipt-tap-hint">Toca el recibo para añadir un artículo</div>
+      </div>
     </div>
   </div>
 
@@ -1252,6 +1378,19 @@ label {
   </button>
 </div>
 
+<!-- TAP-TO-ADD POPUP -->
+<div class="tap-popup" id="tap-popup">
+  <div class="tap-popup-title" id="tap-popup-title">Añadir artículo</div>
+  <div class="tap-popup-row">
+    <input type="text"   id="tap-name"  placeholder="Nombre...">
+    <input type="number" id="tap-price" placeholder="$0.00" step="0.01" min="0">
+  </div>
+  <label class="tap-popup-alc"><input type="checkbox" id="tap-alc"> <span id="tap-alc-lbl">Alcohol</span></label>
+  <div class="tap-popup-btns">
+    <button class="btn bgl" style="padding:10px;font-size:13px" onclick="closeTapPopup()" id="tap-cancel-btn">Cancelar</button>
+    <button class="btn bt"  style="padding:10px;font-size:13px" onclick="confirmTapItem()" id="tap-confirm-btn">Añadir</button>
+  </div>
+</div>
 </div><!-- /app -->
 
 
@@ -1280,6 +1419,10 @@ const T = {
     s1:'Preparando OCR', s2:'Reconociendo texto', s3:'Analizando líneas',
     drag:'Arrastra artículos sobre un participante →',
     receiptRef:'Ver recibo',
+    scanDoc:'Escanear recibo',
+    scanDocSub:'Imagen limpia y precisa',
+    tapHint:'Toca el recibo para añadir un artículo',
+    tapTitle:'Añadir artículo',
     unassign:'Sin asignar — arrastra o toca', assigned:'Artículos asignados',
     backS:'Inicio', backR:'Ajustar',
     totalLbl:'Total de la cuenta', tip:'Propina', tipFix:'$ Fijo',
@@ -1325,6 +1468,10 @@ const T = {
     s1:'Preparing OCR', s2:'Recognizing text', s3:'Analyzing lines',
     drag:'Drag items onto a participant →',
     receiptRef:'View receipt',
+    scanDoc:'Scan receipt',
+    scanDocSub:'Clean, precise image',
+    tapHint:'Tap receipt to add an item',
+    tapTitle:'Add item',
     unassign:'Unassigned — drag or tap', assigned:'Assigned items',
     backS:'Start', backR:'Adjust',
     totalLbl:'Total bill', tip:'Tip', tipFix:'$ Fixed',
@@ -1385,6 +1532,11 @@ function applyLang() {
     's1-txt': L.s1, 's2-txt': L.s2, 's3-txt': L.s3,
     'drag-lbl': L.drag,
     'receipt-ref-lbl': L.receiptRef,
+    'scan-doc-lbl':    L.scanDoc,
+    'scan-doc-sub':    L.scanDocSub,
+    'receipt-tap-hint':L.tapHint,
+    'tap-popup-title': L.tapTitle,
+    'tap-alc-lbl':     L.alcohol,
     'back-s': L.backS, 'back-r': L.backR,
     'tip-lbl': L.tip, 'tip-fix-lbl': L.tipFix,
     'tip-s0': L.tipStd, 'tip-s1': L.tipGood, 'tip-s2': L.tipGreat, 'tip-s3': L.tipWow,
@@ -1596,6 +1748,8 @@ function initSplit(){
   newQty=1;document.getElementById('qty-disp').textContent='1';
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
+  // Clear tap markers from previous session
+  tapMarkers.forEach(m => m.remove()); tapMarkers = [];
   // Show receipt reference image if we have one
   const refPanel = document.getElementById('receipt-ref');
   const refImg   = document.getElementById('receipt-ref-img');
@@ -1724,6 +1878,8 @@ function addItem(){
   for(let q=0;q<newQty;q++)items.unshift({id:Date.now()+q,name:name||L.nameHold,price,isAlcohol:isAlc,assignedTo:[]});
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
+  // Clear tap markers from previous session
+  tapMarkers.forEach(m => m.remove()); tapMarkers = [];
   newQty=1;document.getElementById('qty-disp').textContent='1';
   renderItems();renderDropZones();updProgress();
   document.getElementById('ni-name').focus();
@@ -1890,11 +2046,121 @@ function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 function escA(s){return(s||'').replace(/"/g,'&quot;');}
 
 function backToUpload(){if(items.length>0){if(!confirm(L.backConfirm))return;}items=[];persons=[];showV('v-upload');}
+
+// ── DOCUMENT SCANNER ──
+function triggerScan() {
+  // On iOS: no capture attr → shows menu with "Scan Documents" option (like Notes)
+  // On Android/desktop: opens file picker for image/PDF
+  document.getElementById('inp-scan').value = '';
+  document.getElementById('inp-scan').click();
+}
+
+// ── RECEIPT TAP-TO-ADD ──
+let tapMarkers = []; // track placed markers
+
+function onReceiptTap(e) {
+  const wrap = document.getElementById('receipt-overlay');
+  if (!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+
+  // Get tap coords relative to image wrap
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+
+  // Hide the hint after first tap
+  const hint = document.getElementById('receipt-tap-hint');
+  if (hint) hint.style.display = 'none';
+
+  // Place a marker dot at tap position
+  const marker = document.createElement('div');
+  marker.className = 'receipt-tap-marker';
+  marker.style.left = x + 'px';
+  marker.style.top  = y + 'px';
+  marker.id = 'tap-marker-pending';
+  // Remove old pending marker
+  const old = document.getElementById('tap-marker-pending');
+  if (old) old.remove();
+  wrap.appendChild(marker);
+
+  // Show popup near tap point but within viewport
+  showTapPopup(clientX, clientY);
+}
+
+function showTapPopup(cx, cy) {
+  const popup = document.getElementById('tap-popup');
+  if (!popup) return;
+  popup.classList.add('show');
+  document.getElementById('tap-name').value  = '';
+  document.getElementById('tap-price').value = '';
+  document.getElementById('tap-alc').checked = false;
+
+  // Position popup: prefer below tap, flip if near bottom
+  const pw = Math.min(280, window.innerWidth * 0.9);
+  const ph = 160;
+  let left = cx - pw / 2;
+  let top  = cy + 18;
+  // clamp horizontal
+  left = Math.max(10, Math.min(left, window.innerWidth - pw - 10));
+  // flip above if not enough room below
+  if (top + ph > window.innerHeight - 20) top = cy - ph - 18;
+  top = Math.max(10, top);
+  popup.style.left  = left + 'px';
+  popup.style.top   = top  + 'px';
+  popup.style.width = pw   + 'px';
+
+  // Focus name input
+  setTimeout(() => document.getElementById('tap-name')?.focus(), 80);
+}
+
+function closeTapPopup() {
+  document.getElementById('tap-popup')?.classList.remove('show');
+  const m = document.getElementById('tap-marker-pending');
+  if (m) m.remove();
+}
+
+function confirmTapItem() {
+  const name  = document.getElementById('tap-name').value.trim();
+  const price = parseFloat(document.getElementById('tap-price').value) || 0;
+  const isAlc = document.getElementById('tap-alc').checked || isAlcN(name);
+  if (!name && !price) { document.getElementById('tap-name').focus(); return; }
+  // Add as regular item (unassigned)
+  items.unshift({ id: Date.now(), name: name || L.nameHold, price, isAlcohol: isAlc, assignedTo: [] });
+  // Convert pending marker to confirmed (gold solid dot)
+  const m = document.getElementById('tap-marker-pending');
+  if (m) {
+    m.id = 'tap-marker-' + Date.now();
+    m.style.background = 'var(--gold)';
+    m.style.border     = '2px solid var(--gold-l)';
+    m.style.width      = '12px';
+    m.style.height     = '12px';
+    tapMarkers.push(m);
+  }
+  document.getElementById('tap-popup')?.classList.remove('show');
+  renderItems(); updProgress();
+}
+
+// Close popup on outside tap
+document.addEventListener('click', e => {
+  const popup = document.getElementById('tap-popup');
+  if (!popup?.classList.contains('show')) return;
+  if (!popup.contains(e.target) && !document.getElementById('receipt-overlay')?.contains(e.target)) {
+    closeTapPopup();
+  }
+});
+
 function backToSplit(){showV('v-split');renderDropZones();renderItems();updProgress();}
 
 function toggleReceiptRef() {
   const panel = document.getElementById('receipt-ref');
-  if(panel) panel.classList.toggle('open');
+  if (!panel) return;
+  panel.classList.toggle('open');
+  // Re-show tap hint when expanding if no markers placed yet
+  if (panel.classList.contains('open') && tapMarkers.length === 0) {
+    const hint = document.getElementById('receipt-tap-hint');
+    if (hint) hint.style.display = 'block';
+  }
 }
 
 document.getElementById('ni-price')?.addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
