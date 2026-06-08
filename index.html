@@ -337,6 +337,15 @@ label {
   color: rgba(245,240,232,.38);
   letter-spacing: .28em; text-transform: uppercase;
 }
+.logo-attrs {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: .70;
+  margin-top: 6px;
+}
 
 /* Photo buttons */
 .photo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1063,9 +1072,18 @@ label {
 .tap-popup-alc input { width: 14px; height: 14px; accent-color: var(--gold-l); cursor: pointer; }
 .tap-popup-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 
+
+.scan-hint-txt {
+  font-size: 11px;
+  color: var(--t3);
+  line-height: 1.5;
+  margin: 8px 0 0;
+  letter-spacing: .01em;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -1087,7 +1105,8 @@ label {
     </div>
     <div class="logo-word">Fr<em>a</em>c</div>
     <div class="logo-divider"></div>
-    <div class="logo-tag" id="logo-tag">Divide con precisión</div>
+    <div class="logo-tag" id="logo-tag">El final perfecto de una buena cena.</div>
+    <div class="logo-attrs">PRECISO · DISCRETO · LISTO</div>
     <div style="margin-top:14px">
       <button id="lang-btn" onclick="toggleLang()"
         style="background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.22);
@@ -1135,6 +1154,7 @@ label {
     </div>
     <div class="bot-btns">
       <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo</button>
+      <p class="scan-hint-txt">Captura solo los artículos del recibo, de cerca y desde arriba. Los totales e impuestos los calculamos nosotros.</p>
       <button class="btn bgl" onclick="manualMode()" style="font-size:14px;padding:12px"><span id="manual-lbl">Ingresar manualmente</span></button>
     </div>
   </div>
@@ -1304,7 +1324,7 @@ label {
   </div>
   <div style="padding:10px 16px max(14px,env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid rgba(201,168,76,.10);display:flex;gap:9px">
     <button class="btn bt"  style="flex:1" onclick="saveNew()">Guardar</button>
-    <button class="btn bgl" style="flex:1" onclick="exportCSV()">Exportar CSV</button>
+    <button class="btn bgl" style="flex:1" onclick="shareCard()">Compartir resumen</button>
   </div>
 </div>
 
@@ -2420,6 +2440,80 @@ window.addEventListener('DOMContentLoaded', ()=>{ applyLang(); });
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
 }
+
+function shareCard(){
+  const {ps, grand} = calcRes();
+  document.getElementById('sc-restaurant').textContent =
+    document.getElementById('rest-in').value || 'Restaurante';
+  document.getElementById('sc-date').textContent =
+    document.getElementById('date-in').value || '';
+  document.getElementById('sc-grand').textContent = '$' + f2(grand);
+
+  const perDiv = document.getElementById('sc-persons');
+  perDiv.innerHTML = '';
+  ps.forEach(p => {
+    perDiv.innerHTML += `
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  padding:10px 12px;background:rgba(20,17,14,.8);
+                  border:1px solid rgba(201,168,76,.18);border-radius:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:30px;height:30px;border-radius:99px;
+                      background:linear-gradient(135deg,#a5b4fc,#4f46e5);
+                      display:flex;align-items:center;justify-content:center;
+                      font-size:13px;font-weight:700;color:#fff">
+            ${p.name.charAt(0).toUpperCase()}
+          </div>
+          <span style="font-size:13px;color:#F5F0E8;font-weight:500">${p.name}</span>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:15px;
+                     font-weight:700;color:#E8D5A3">$${f2(p.total)}</span>
+      </div>`;
+  });
+
+  const card = document.getElementById('share-card');
+  card.style.left = '-9999px';
+  document.body.appendChild(card);
+
+  html2canvas(card, { backgroundColor: '#0F0D0B', scale: 2 }).then(canvas => {
+    canvas.toBlob(blob => {
+      const file = new File([blob], 'frac-resumen.png', { type: 'image/png' });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Frac · Resumen' });
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'frac-resumen.png';
+        a.click();
+      }
+    }, 'image/png');
+  });
+}
 </script>
+
+<div id="share-card" style="
+  position:fixed; left:-9999px; top:0;
+  width:380px; padding:32px 28px 24px;
+  background:#0F0D0B;
+  font-family:'Inter',sans-serif;
+  border:1px solid rgba(201,168,76,.28);
+  border-radius:18px;
+">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+    <svg width="22" height="22" viewBox="0 0 30 30" fill="none">
+      <line x1="6" y1="10" x2="24" y2="10" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="15" cy="15" r="2.5" fill="#E8D5A3"/>
+      <line x1="6" y1="20" x2="24" y2="20" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <span style="font-size:18px;font-weight:900;color:#F5F0E8;letter-spacing:-.03em">Frac</span>
+  </div>
+  <div id="sc-restaurant" style="font-size:13px;color:rgba(245,240,232,.55);margin-bottom:2px"></div>
+  <div id="sc-date" style="font-size:11px;color:rgba(245,240,232,.30);margin-bottom:18px"></div>
+  <div id="sc-persons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+  <div style="border-top:1px solid rgba(201,168,76,.14);padding-top:14px;display:flex;justify-content:space-between;align-items:baseline">
+    <span style="font-size:11px;color:rgba(245,240,232,.35);text-transform:uppercase;letter-spacing:.1em">Total</span>
+    <span id="sc-grand" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;color:#C9A84C"></span>
+  </div>
+  <div style="margin-top:16px;font-size:10px;color:rgba(245,240,232,.18);text-align:center;letter-spacing:.12em;text-transform:uppercase">Dividido con Frac · dividecuenta.vercel.app</div>
+</div>
 </body>
 </html>
