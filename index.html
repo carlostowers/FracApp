@@ -1116,34 +1116,36 @@ label {
   </div>
 
   <div class="up-scroll">
-    <div class="photo-row-3" id="photo-btns">
-      <!-- Primary: Document Scanner (iOS native) -->
-      <div class="pbtn-scan" onclick="triggerScan()">
+    <!-- iOS SCAN INSTRUCTIONS (shown briefly on first use) -->
+    <div id="scan-ios-tip" style="display:none;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--t2);line-height:1.6;">
+      <div style="font-weight:700;color:var(--gold-l);margin-bottom:4px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;" id="scan-tip-title">📱 Cómo escanear en iPhone</div>
+      <div id="scan-tip-body">Cuando se abra la cámara, mantén presionado el botón de captura → selecciona <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS corregirá la perspectiva automáticamente.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px" id="photo-btns">
+      <!-- SCAN — full row on first line -->
+      <div class="pbtn-scan" onclick="triggerScan()" style="grid-column:1/-1">
         <div class="scan-icon-wrap">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3H3v4"/><path d="M19 3h2v4"/><path d="M5 21H3v-4"/><path d="M19 21h2v-4"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
         </div>
         <div class="scan-text">
           <span class="scan-title" id="scan-doc-lbl">Escanear recibo</span>
-          <span class="scan-sub" id="scan-doc-sub">Imagen limpia y precisa</span>
+          <span class="scan-sub" id="scan-doc-sub">Recomendado — mejor calidad</span>
         </div>
       </div>
-      <!-- Secondary: regular camera -->
-      <div class="pbtn-sm" onclick="triggerCamera()">
+      <!-- CAMERA + GALLERY — equal width, full row -->
+      <div class="pbtn-sm" onclick="triggerCamera()" style="grid-column:1/2">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <span id="cam-lbl">Cámara</span>
       </div>
-      <!-- Secondary: gallery -->
-      <div class="pbtn-sm" onclick="triggerGallery()">
+      <div class="pbtn-sm" onclick="triggerGallery()" style="grid-column:2/4">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
         <span id="gal-lbl">Galería</span>
       </div>
     </div>
-    <!-- Scanner input: no capture attr → iOS shows full menu incl. "Scan Documents" -->
     <input type="file" id="inp-scan" accept="image/*,application/pdf" style="display:none" onchange="onFile(this)">
-    <!-- Camera input -->
-    <input type="file" id="inp-cam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
-    <!-- Gallery input -->
-    <input type="file" id="inp-gal" accept="image/*,image/heic,image/heif,.heic,.heif" style="display:none" onchange="onFile(this)">
+    <input type="file" id="inp-cam"  accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
+    <input type="file" id="inp-gal"  accept="image/*,image/heic,image/heif,.heic,.heif" style="display:none" onchange="onFile(this)">
 
     <div class="prev-w" id="prev-w">
       <img id="prev-img" src="" alt="Recibo">
@@ -1230,7 +1232,7 @@ label {
       <svg class="receipt-ref-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
     <div class="receipt-ref-img-wrap">
-      <div class="receipt-overlay-wrap" id="receipt-overlay" onclick="onReceiptTap(event)">
+      <div class="receipt-overlay-wrap" id="receipt-overlay" onclick="onReceiptTap(event)" ontouchend="onReceiptTap(event);event.preventDefault()">
         <img id="receipt-ref-img" src="" alt="Recibo">
         <div class="receipt-tap-hint" id="receipt-tap-hint">Toca el recibo para añadir un artículo</div>
       </div>
@@ -1420,6 +1422,9 @@ const T = {
     drag:'Arrastra artículos sobre un participante →',
     receiptRef:'Ver recibo',
     scanDoc:'Escanear recibo',
+    scanTipTitle:'📱 Cómo escanear en iPhone',
+    scanTipBody:'Cuando se abra la cámara, mantén presionado el botón de captura → selecciona <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS corregirá la perspectiva automáticamente.',
+    tapHintTxt:'Toca el recibo para leer artículos',
     scanDocSub:'Imagen limpia y precisa',
     tapHint:'Toca el recibo para añadir un artículo',
     tapTitle:'Añadir artículo',
@@ -1469,6 +1474,9 @@ const T = {
     drag:'Drag items onto a participant →',
     receiptRef:'View receipt',
     scanDoc:'Scan receipt',
+    scanTipTitle:'📱 How to scan on iPhone',
+    scanTipBody:'When camera opens, press and hold the capture button → select <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS will auto-correct perspective.',
+    tapHintTxt:'Tap receipt to read items',
     scanDocSub:'Clean, precise image',
     tapHint:'Tap receipt to add an item',
     tapTitle:'Add item',
@@ -1533,6 +1541,7 @@ function applyLang() {
     'drag-lbl': L.drag,
     'receipt-ref-lbl': L.receiptRef,
     'scan-doc-lbl':    L.scanDoc,
+    'scan-tip-title':  L.scanTipTitle,
     'scan-doc-sub':    L.scanDocSub,
     'receipt-tap-hint':L.tapHint,
     'tap-popup-title': L.tapTitle,
@@ -1696,9 +1705,11 @@ async function startScan(){
       logger:m=>{if(m.status==='recognizing text'){markS('s1','s2');if(lbl)lbl.textContent=L.s2+'...';}}
     });
     markS('s1','s2');
-    const{data:{text}}=await worker.recognize(imgUrl);
+    const{data:{text, words}}=await worker.recognize(imgUrl);
     await worker.terminate();URL.revokeObjectURL(imgUrl);
     markS('s2','s3');if(lbl)lbl.textContent=L.s3+'...';
+    // Store word positions for tap-to-text in split view
+    window._ocrWords = (words||[]).filter(w=>w.confidence>40&&w.text.trim().length>0);
 
     const IGNORE=/^(subtotal|sub-total|total tax|total|balance due|balance|municipal tax|munincipal tax|reducido tax|estate tax|state tax|excise tax|iva|ivu|itbms|tax|change|cash due|visa|mastercard|amex|discover|auth|approval|gratuity|service charge|mesa|table|check #|receipt|server:|cashier|cajero|guests?:|phone|tel:|fax|www\.|http|tip is|gracias|thank you|suggested|\d+%\s*=)/i;
     const ALCOHOL=/beer|cerveza|vino|wine|ron|rum|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|liquor|champagne|sangria|mojito|mule|moscow|blond|ipa|lager|seltzer|pale ale|draft|draught|coors|budweiser|bud |smirnoff|baileys|kahlua|malibu|hennessy|jack daniel|patron|bacardi|jose cuervo/i;
@@ -2049,8 +2060,18 @@ function backToUpload(){if(items.length>0){if(!confirm(L.backConfirm))return;}it
 
 // ── DOCUMENT SCANNER ──
 function triggerScan() {
-  // On iOS: no capture attr → shows menu with "Scan Documents" option (like Notes)
-  // On Android/desktop: opens file picker for image/PDF
+  // Show iOS instructions on first use
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const tipShown = localStorage.getItem('frac_scan_tip');
+  if (isIOS && !tipShown) {
+    const tip = document.getElementById('scan-ios-tip');
+    if (tip) {
+      tip.style.display = 'block';
+      localStorage.setItem('frac_scan_tip', '1');
+      // Auto-hide after 5s
+      setTimeout(() => { tip.style.display = 'none'; }, 5000);
+    }
+  }
   document.getElementById('inp-scan').value = '';
   document.getElementById('inp-scan').click();
 }
@@ -2061,40 +2082,79 @@ let tapMarkers = []; // track placed markers
 function onReceiptTap(e) {
   const wrap = document.getElementById('receipt-overlay');
   if (!wrap) return;
+  const img  = document.getElementById('receipt-ref-img');
+  if (!img)  return;
   const rect = wrap.getBoundingClientRect();
+  const imgRect = img.getBoundingClientRect();
 
-  // Get tap coords relative to image wrap
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+  const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
   const x = clientX - rect.left;
   const y = clientY - rect.top;
 
-  // Hide the hint after first tap
+  // Hide hint
   const hint = document.getElementById('receipt-tap-hint');
   if (hint) hint.style.display = 'none';
 
-  // Place a marker dot at tap position
+  // Find nearest OCR words in tapped region
+  // Map tap position to original image coordinates
+  const scaleX = img.naturalWidth  / imgRect.width;
+  const scaleY = img.naturalHeight / imgRect.height;
+  const imgOffX = imgRect.left - rect.left;
+  const imgOffY = imgRect.top  - rect.top;
+  const origX = (x - imgOffX) * scaleX;
+  const origY = (y - imgOffY) * scaleY;
+
+  // Find words within ~100px radius in original image coords
+  const words = window._ocrWords || [];
+  const RADIUS_Y = img.naturalHeight * 0.04; // ~4% height = one line zone
+  const RADIUS_X = img.naturalWidth  * 0.8;  // wide X range = full line width
+
+  // Collect words on the same horizontal line as tap
+  const lineWords = words.filter(w => {
+    const wCy = (w.bbox.y0 + w.bbox.y1) / 2;
+    return Math.abs(wCy - origY) < RADIUS_Y;
+  }).sort((a,b) => a.bbox.x0 - b.bbox.x0);
+
+  // Also get words in 3-line zone above tap for price detection
+  const nearWords = words.filter(w => {
+    const wCy = (w.bbox.y0 + w.bbox.y1) / 2;
+    return Math.abs(wCy - origY) < RADIUS_Y * 3;
+  });
+
+  // Try to extract item name (non-numeric words on same line)
+  const nameParts = lineWords
+    .filter(w => !/^[\$\d\.,]+$/.test(w.text))
+    .map(w => w.text).join(' ').trim();
+
+  // Try to extract price (last number on the line or nearby)
+  const priceMatch = lineWords
+    .map(w => w.text)
+    .join(' ')
+    .match(/\$?\s*(\d{1,3}[.,]\d{2})\s*$/);
+  const detectedPrice = priceMatch ? parseFloat(priceMatch[1].replace(',','.')) : 0;
+
+  // Place marker
+  const oldM = document.getElementById('tap-marker-pending');
+  if (oldM) oldM.remove();
   const marker = document.createElement('div');
   marker.className = 'receipt-tap-marker';
   marker.style.left = x + 'px';
   marker.style.top  = y + 'px';
   marker.id = 'tap-marker-pending';
-  // Remove old pending marker
-  const old = document.getElementById('tap-marker-pending');
-  if (old) old.remove();
   wrap.appendChild(marker);
 
-  // Show popup near tap point but within viewport
-  showTapPopup(clientX, clientY);
+  // Pre-fill popup with detected text
+  showTapPopup(clientX, clientY, nameParts, detectedPrice);
 }
 
-function showTapPopup(cx, cy) {
+function showTapPopup(cx, cy, prefillName='', prefillPrice=0) {
   const popup = document.getElementById('tap-popup');
   if (!popup) return;
   popup.classList.add('show');
-  document.getElementById('tap-name').value  = '';
-  document.getElementById('tap-price').value = '';
-  document.getElementById('tap-alc').checked = false;
+  document.getElementById('tap-name').value  = prefillName;
+  document.getElementById('tap-price').value = prefillPrice > 0 ? prefillPrice.toFixed(2) : '';
+  document.getElementById('tap-alc').checked = prefillName ? isAlcN(prefillName) : false;
 
   // Position popup: prefer below tap, flip if near bottom
   const pw = Math.min(280, window.innerWidth * 0.9);
