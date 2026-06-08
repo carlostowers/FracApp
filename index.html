@@ -1597,21 +1597,97 @@ function onFile(input){
   const img=new Image();
   img.onload=()=>{
     const w0=img.naturalWidth,h0=img.naturalHeight;
-    if(!w0||!h0){URL.revokeObjectURL(objURL);showImgStatus('');document.getElementById('photo-btns').style.display='grid';alert(L.imgErr);return;}
-    const MAX=1800,scale=Math.min(1,MAX/Math.max(w0,h0));
-    const w=Math.round(w0*scale),h=Math.round(h0*scale);
-    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
-    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    if(!w0||!h0){
+      URL.revokeObjectURL(objURL);showImgStatus('');
+      document.getElementById('photo-btns').style.display='grid';
+      alert(L.imgErr);return;
+    }
+    // ── Step 1: Resize to max 1800px ──
+    const MAX=1800, scale=Math.min(1,MAX/Math.max(w0,h0));
+    const w=Math.round(w0*scale), h=Math.round(h0*scale);
+
+    const canvasOrig=document.createElement('canvas');
+    canvasOrig.width=w; canvasOrig.height=h;
+    const ctxOrig=canvasOrig.getContext('2d');
+    ctxOrig.drawImage(img,0,0,w,h);
     URL.revokeObjectURL(objURL);
-    const jpeg=canvas.toDataURL('image/jpeg',0.88);
-    if(!jpeg||jpeg==='data:,'){showImgStatus('');document.getElementById('photo-btns').style.display='grid';alert(L.imgConvErr);return;}
-    imgB64=jpeg.split(',')[1];imgMime='image/jpeg';
-    document.getElementById('prev-img').src=jpeg;
+
+    // Show original as preview (color, easier for user to see)
+    const previewJpeg=canvasOrig.toDataURL('image/jpeg',0.88);
+    document.getElementById('prev-img').src=previewJpeg;
     document.getElementById('prev-w').style.display='block';
+
+    // ── Step 2: Enhance for OCR on a separate canvas ──
+    const canvasOCR=document.createElement('canvas');
+    canvasOCR.width=w; canvasOCR.height=h;
+    const ctx=canvasOCR.getContext('2d');
+    ctx.drawImage(img,0,0,w,h);
+
+    const imageData=ctx.getImageData(0,0,w,h);
+    const d=imageData.data;
+
+    // ── Step 2a: Compute average luminance for auto-exposure ──
+    let lumSum=0;
+    for(let i=0;i<d.length;i+=4){
+      lumSum += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+    }
+    const avgLum = lumSum / (w*h);
+    // Target luminance ~180 (bright document). Scale accordingly.
+    const expScale = Math.min(2.5, Math.max(0.5, 180/Math.max(avgLum,1)));
+
+    // ── Step 2b: Grayscale + auto-exposure + contrast boost ──
+    // Contrast: stretch histogram. S-curve: output = (input-128)*contrast+128
+    const contrast = 1.6; // boost contrast 60%
+    for(let i=0;i<d.length;i+=4){
+      // Grayscale
+      let gray = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+      // Auto-exposure
+      gray = Math.min(255, gray * expScale);
+      // S-curve contrast
+      gray = Math.min(255, Math.max(0, (gray-128)*contrast+128));
+      d[i]=d[i+1]=d[i+2]=gray;
+      // Alpha unchanged
+    }
+
+    // ── Step 2c: Sharpening (3x3 unsharp mask) ──
+    ctx.putImageData(imageData,0,0);
+    const sharp=ctx.getImageData(0,0,w,h);
+    const src=new Uint8ClampedArray(sharp.data);
+    const dst=sharp.data;
+    // Kernel: unsharp mask = original*2 - blurred
+    // Approximate with 3x3: center*5 - neighbors*1
+    for(let y=1;y<h-1;y++){
+      for(let x=1;x<w-1;x++){
+        const idx=(y*w+x)*4;
+        for(let c=0;c<3;c++){
+          const v = 5*src[idx+c]
+            - src[((y-1)*w+x)*4+c]
+            - src[((y+1)*w+x)*4+c]
+            - src[(y*w+x-1)*4+c]
+            - src[(y*w+x+1)*4+c];
+          dst[idx+c]=Math.min(255,Math.max(0,v));
+        }
+      }
+    }
+    ctx.putImageData(sharp,0,0);
+
+    // ── Step 3: Export enhanced image for OCR ──
+    const enhancedJpeg=canvasOCR.toDataURL('image/jpeg',0.92);
+    if(!enhancedJpeg||enhancedJpeg==='data:,'){
+      showImgStatus('');
+      document.getElementById('photo-btns').style.display='grid';
+      alert(L.imgConvErr);return;
+    }
+    imgB64=enhancedJpeg.split(',')[1];
+    imgMime='image/jpeg';
     showImgStatus('');
     document.getElementById('scan-btn').disabled=false;
   };
-  img.onerror=()=>{URL.revokeObjectURL(objURL);showImgStatus('');document.getElementById('photo-btns').style.display='grid';alert(L.imgFmtErr);};
+  img.onerror=()=>{
+    URL.revokeObjectURL(objURL);showImgStatus('');
+    document.getElementById('photo-btns').style.display='grid';
+    alert(L.imgFmtErr);
+  };
   img.src=objURL;
 }
 
