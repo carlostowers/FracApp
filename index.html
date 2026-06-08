@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080706">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Frac">
+<meta name="description" content="Divide cuentas de restaurante al instante · Split restaurant bills instantly">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-512.svg">
 <title>Frac — Divide con precisión</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -908,6 +915,27 @@ label {
   box-shadow: 0 8px 40px rgba(0,0,0,.6), 0 0 20px rgba(201,168,76,.22);
   display: none;
 }
+
+/* ─── TAX CONFIG PANEL ─── */
+.tax-panel { padding: 15px; margin-bottom: 11px; }
+.tax-ph { display:flex; align-items:center; justify-content:space-between; margin-bottom:13px; }
+.tax-title { font-size:10px; font-weight:700; color:var(--t3); text-transform:uppercase; letter-spacing:.08em; }
+.tax-reset { font-size:10px; font-weight:600; color:var(--gold); background:none; border:none;
+  cursor:pointer; font-family:var(--font); display:none; transition:opacity 150ms; }
+.tax-reset:hover { opacity:.75; }
+.tax-badge { display:inline-flex; align-items:center; gap:5px; background:var(--gold-dim);
+  border:1px solid var(--gold-bdr); border-radius:99px; padding:3px 10px;
+  font-size:9px; font-weight:700; color:var(--gold-l); letter-spacing:.05em;
+  text-transform:uppercase; margin-bottom:12px; }
+.tax-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.tax-row:last-of-type { margin-bottom:0; }
+.tax-lbl { font-size:12px; font-weight:600; color:var(--t2); flex:1; }
+.tax-inp-w { display:flex; align-items:center; gap:5px; }
+.tax-inp-w input { width:70px; padding:8px 10px; font-size:14px;
+  font-family:var(--mono); font-feature-settings:"tnum"; text-align:right; }
+.tax-pct { font-size:13px; font-weight:700; color:var(--gold); font-family:var(--mono); }
+.tax-note { font-size:10px; color:var(--t3); margin-top:11px; line-height:1.55; }
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -932,18 +960,26 @@ label {
     </div>
     <div class="logo-word">Fr<em>a</em>c</div>
     <div class="logo-divider"></div>
-    <div class="logo-tag">Divide con precisión</div>
+    <div class="logo-tag" id="logo-tag">Divide con precisión</div>
+    <div style="margin-top:14px"><button id="lang-btn" onclick="setLang(lang==='es'?'en':'es')" style="background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.22);border-radius:99px;color:var(--gold-l);font-size:11px;font-weight:700;letter-spacing:.08em;padding:5px 14px;cursor:pointer;font-family:var(--font);transition:all 180ms">EN</button></div>
+    <div style="margin-top:14px">
+      <button id="lang-btn" onclick="setLang(lang==='es'?'en':'es')"
+        style="background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.22);
+               border-radius:99px;color:var(--gold-l);font-size:11px;font-weight:700;
+               letter-spacing:.08em;padding:5px 14px;cursor:pointer;
+               font-family:var(--font);transition:all 180ms">EN</button>
+    </div>
   </div>
 
   <div class="up-scroll">
     <div class="photo-row" id="photo-btns">
       <div class="pbtn" onclick="triggerCamera()">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span>Cámara</span>
+        <span id="cam-lbl">Cámara</span>
       </div>
       <div class="pbtn" onclick="triggerGallery()">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-        <span>Galería</span>
+        <span id="gal-lbl">Galería</span>
       </div>
     </div>
     <input type="file" id="inp-cam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
@@ -958,7 +994,7 @@ label {
     </div>
 
     <div class="glass sc-card">
-      <h3>Participantes</h3>
+      <h3 id="people-title">Participantes</h3>
       <div class="pc-row">
         <button class="pc-b" onclick="changeCount(-1)">−</button>
         <div class="pc-n" id="cnt">2</div>
@@ -973,7 +1009,7 @@ label {
     </div>
     <div class="bot-btns">
       <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo</button>
-      <button class="btn bgl" onclick="manualMode()" style="font-size:14px;padding:12px">Ingresar manualmente</button>
+      <button class="btn bgl" onclick="manualMode()" style="font-size:14px;padding:12px"><span id="manual-lbl">Ingresar manualmente</span></button>
     </div>
   </div>
 </div>
@@ -987,12 +1023,12 @@ label {
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
     </div>
   </div>
-  <h2>Analizando recibo</h2>
+  <h2 id="scan-h">Analizando recibo</h2>
   <p id="scan-provider-label">Iniciando reconocimiento de texto…</p>
   <div class="ss glass-sm">
-    <div class="st on" id="s1"><div class="sd"></div>Preparando OCR</div>
-    <div class="st"    id="s2"><div class="sd"></div>Reconociendo texto</div>
-    <div class="st"    id="s3"><div class="sd"></div>Analizando líneas</div>
+    <div class="st on" id="s1"><div class="sd"></div><span id="s1-txt">Preparando OCR</span></div>
+    <div class="st"    id="s2"><div class="sd"></div><span id="s2-txt">Reconociendo texto</span></div>
+    <div class="st"    id="s3"><div class="sd"></div><span id="s3-txt">Analizando líneas</span></div>
   </div>
 </div>
 
@@ -1001,7 +1037,7 @@ label {
   <div class="view-topbar">
     <button class="back-btn" onclick="backToUpload()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-      Inicio
+      <span id="back-s">Inicio</span>
     </button>
   </div>
   <div class="sp-hdr">
@@ -1020,7 +1056,7 @@ label {
   </div>
 
   <div style="padding:7px 16px 3px;font-size:9px;font-weight:700;color:var(--t4);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;background:rgba(8,7,6,.70);">
-    Arrastra artículos sobre un participante →
+    <span id="drag-lbl">Arrastra artículos sobre un participante →</span>
   </div>
   <div class="drop-row" id="drop-row"></div>
 
@@ -1062,7 +1098,7 @@ label {
   <div class="view-topbar">
     <button class="back-btn" onclick="backToSplit()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-      Ajustar
+      <span id="back-r">Ajustar</span>
     </button>
   </div>
   <div class="rh">
@@ -1074,16 +1110,40 @@ label {
     <div class="r-sub" id="r-date"></div>
   </div>
   <div class="scroll">
+    <!-- TAX PANEL -->
+    <div class="glass tax-panel">
+      <div class="tax-ph">
+        <div class="tax-title" id="tax-title">Impuestos</div>
+        <button class="tax-reset" id="tax-reset-btn" onclick="resetTax()">PR Default</button>
+      </div>
+      <div class="tax-badge"><svg width="7" height="7" viewBox="0 0 7 7" fill="var(--gold)"><circle cx="3.5" cy="3.5" r="3.5"/></svg><span id="tax-badge-txt">Puerto Rico</span></div>
+      <div class="tax-row">
+        <span class="tax-lbl" id="tax-food-lbl">Tax comida</span>
+        <div class="tax-inp-w">
+          <input type="number" id="tax-food-inp" value="7" min="0" max="99" step="0.1" oninput="onTaxChange()">
+          <span class="tax-pct">%</span>
+        </div>
+      </div>
+      <div class="tax-row">
+        <span class="tax-lbl" id="tax-alc-lbl">Tax alcohol</span>
+        <div class="tax-inp-w">
+          <input type="number" id="tax-alc-inp" value="11.5" min="0" max="99" step="0.1" oninput="onTaxChange()">
+          <span class="tax-pct">%</span>
+        </div>
+      </div>
+      <div class="tax-note" id="tax-note">Tasas de Puerto Rico. Cámbialas si estás en otro país.</div>
+    </div>
+
     <div class="glass tip-c">
-      <div class="tip-c-label">Propina</div>
+      <div class="tip-c-label" id="tip-lbl">Propina</div>
       <div class="tip-seg">
-        <div class="tp" onclick="setTip(15)">15%<span>Estándar</span></div>
-        <div class="tp" onclick="setTip(18)">18%<span>Bueno</span></div>
-        <div class="tp" onclick="setTip(20)">20%<span>Excelente</span></div>
-        <div class="tp" onclick="setTip(25)">25%<span>Wow</span></div>
+        <div class="tp" onclick="setTip(15)">15%<span id="tip-s0">Estándar</span></div>
+        <div class="tp" onclick="setTip(18)">18%<span id="tip-s1">Bueno</span></div>
+        <div class="tp" onclick="setTip(20)">20%<span id="tip-s2">Excelente</span></div>
+        <div class="tp" onclick="setTip(25)">25%<span id="tip-s3">Wow</span></div>
       </div>
       <div class="tcust">
-        <label>$ Fijo</label>
+        <label id="tip-fix-lbl">$ Fijo</label>
         <input type="number" id="tip-fix" placeholder="0.00" step="0.01" oninput="setTipFix(this.value)">
       </div>
     </div>
@@ -1099,8 +1159,8 @@ label {
 <!-- ════════════════ HISTORY ════════════════ -->
 <div class="view" id="v-hist">
   <div style="padding:20px 16px 12px;flex-shrink:0;border-bottom:1px solid rgba(201,168,76,.10)">
-    <div style="font-size:19px;font-weight:800;letter-spacing:-0.03em">Historial</div>
-    <div style="font-size:12px;color:var(--t2);margin-top:3px">Todas tus visitas guardadas</div>
+    <div style="font-size:19px;font-weight:800;letter-spacing:-0.03em" id="hist-t">Historial</div>
+    <div style="font-size:12px;color:var(--t2);margin-top:3px" id="hist-s">Todas tus visitas guardadas</div>
   </div>
   <div class="scroll"><div id="hist-list"></div></div>
   <div style="padding:9px 16px max(14px,env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid rgba(201,168,76,.10)">
@@ -1114,7 +1174,7 @@ label {
   <div class="mh"></div>
   <div class="mn" id="m-name"></div>
   <div class="mp" id="m-price"></div>
-  <div class="mq">¿Quién pidió este artículo? Puedes seleccionar varios.</div>
+  <div class="mq" id="modal-q">¿Quién pidió este artículo? Puedes seleccionar varios.</div>
   <div class="mpers" id="m-pers"></div>
   <div class="ma">
     <button class="btn bgl" onclick="closeModal()">Cancelar</button>
@@ -1144,17 +1204,198 @@ label {
 </div><!-- /app -->
 
 
+
 <script>
+// ── CONSTANTS ──
 const COLORS=['av0','av1','av2','av3','av4','av5'];
 const LABELS=['P1','P2','P3','P4','P5','P6'];
 const ALC=['beer','cerveza','wine','vino','rum','ron','whiskey','cocktail','margarita','sangria','licor','vodka','gin','tequila','corona','medalla','heineken','budweiser','coors','seltzer','mojito','piña colada','daiquiri','shot','shots','cava','champagne','prosecco','sake','pale ale','ipa','lager','stout','porter','draft','draught'];
 
+// ── TAX STATE (PR defaults, persisted) ──
+const FOOD_PR = 7, ALC_PR = 11.5;
+let taxFood = parseFloat(localStorage.getItem('frac_tf') ?? FOOD_PR);
+let taxAlc  = parseFloat(localStorage.getItem('frac_ta') ?? ALC_PR);
+
+// ── LANGUAGE ──
+let lang = localStorage.getItem('frac_lang') ||
+  ((navigator.language||'').toLowerCase().startsWith('en') ? 'en' : 'es');
+
+const T = {
+  es: {
+    tagline:'Divide con precisión', cam:'Cámara', gal:'Galería',
+    people:'Participantes', rest:'Restaurante', date:'Fecha',
+    scan:'Leer recibo', manual:'Ingresar manualmente',
+    scanH:'Analizando recibo', scanP:'Iniciando OCR…',
+    s1:'Preparando OCR', s2:'Reconociendo texto', s3:'Analizando líneas',
+    drag:'Arrastra artículos sobre un participante →',
+    unassign:'Sin asignar — arrastra o toca', assigned:'Artículos asignados',
+    backS:'Inicio', backR:'Ajustar',
+    totalLbl:'Total de la cuenta', tip:'Propina', tipFix:'$ Fijo',
+    save:'Guardar', csv:'Exportar CSV', csvFull:'Exportar CSV para Excel',
+    histT:'Historial', histS:'Todas tus visitas guardadas',
+    modalQ:'¿Quién pidió este artículo? Puedes seleccionar varios.',
+    cancel:'Cancelar', confirm:'Confirmar',
+    changePic:'Cambiar foto', ready:'✓ Lista',
+    tipStd:'Estándar', tipGood:'Bueno', tipGreat:'Excelente', tipWow:'Wow',
+    allDone:'Todos los artículos asignados',
+    noVisit:'Sin visitas aún', noVisitS:'Completa una cuenta y guárdala',
+    personN: n=>`Persona ${n}`, artN: n=>`${n} art.`,
+    ofN: (d,t)=>`${d} de ${t} asignados`,
+    foodBadge: ()=>`Comida · ${taxFood}%`,
+    alcBadge:  ()=>`Alcohol · ${taxAlc}%`,
+    taxFoodLbl: ()=>`Tax comida (${taxFood}%)`,
+    taxAlcLbl:  ()=>`Tax alcohol (${taxAlc}%)`,
+    tipLbl: pct => pct ? `Propina (${pct}%)` : 'Propina',
+    totalPay:'Total a pagar',
+    noHist:'Guarda al menos una cuenta primero',
+    backConfirm:'¿Volver al inicio? Se perderán los artículos actuales.',
+    taxTitle:'Impuestos', taxFoodRow:'Tax comida', taxAlcRow:'Tax alcohol',
+    taxNote:'Tasas de Puerto Rico. Cámbialas si estás en otro país.',
+    taxNoteCustom:'Tasas personalizadas activas.',
+    taxBadgePR:'Puerto Rico', taxBadgeCustom:'Personalizado',
+    taxReset:'PR Default',
+    imgErr:'Este formato no es compatible.\nUsa JPG, PNG o WebP.',
+    imgConvErr:'Error al convertir la imagen. Intenta con otra foto.',
+    imgFmtErr:'No se pudo leer esta imagen.\nFormatos: JPG, PNG, WebP, HEIC (iOS).',
+    imgBadErr:'La imagen no se procesó correctamente. Vuelve a seleccionarla.',
+    noItems:'No se detectaron artículos.\nVerifica que la foto sea clara, o ingresa manualmente.',
+    ocrErr:'Error al leer el recibo.\nPuedes ingresar los artículos manualmente.',
+    processing:'Procesando imagen...',
+    nameHold:'Nombre del artículo...', priceHold:'$0.00',
+    restHold:'Nombre...', nameF:'Nombre', priceF:'Precio',
+    alcohol:'Alcohol', del:'Eliminar',
+  },
+  en: {
+    tagline:'Split with precision', cam:'Camera', gal:'Gallery',
+    people:'Participants', rest:'Restaurant', date:'Date',
+    scan:'Read receipt', manual:'Enter manually',
+    scanH:'Reading receipt', scanP:'Starting OCR…',
+    s1:'Preparing OCR', s2:'Recognizing text', s3:'Analyzing lines',
+    drag:'Drag items onto a participant →',
+    unassign:'Unassigned — drag or tap', assigned:'Assigned items',
+    backS:'Start', backR:'Adjust',
+    totalLbl:'Total bill', tip:'Tip', tipFix:'$ Fixed',
+    save:'Save', csv:'Export CSV', csvFull:'Export CSV for Excel',
+    histT:'History', histS:'All your saved visits',
+    modalQ:'Who ordered this item? You can select multiple.',
+    cancel:'Cancel', confirm:'Confirm',
+    changePic:'Change photo', ready:'✓ Ready',
+    tipStd:'Standard', tipGood:'Good', tipGreat:'Excellent', tipWow:'Wow',
+    allDone:'All items assigned',
+    noVisit:'No visits yet', noVisitS:'Complete a bill and save it',
+    personN: n=>`Person ${n}`, artN: n=>`${n} items`,
+    ofN: (d,t)=>`${d} of ${t} assigned`,
+    foodBadge: ()=>`Food · ${taxFood}%`,
+    alcBadge:  ()=>`Alcohol · ${taxAlc}%`,
+    taxFoodLbl: ()=>`Food tax (${taxFood}%)`,
+    taxAlcLbl:  ()=>`Alcohol tax (${taxAlc}%)`,
+    tipLbl: pct => pct ? `Tip (${pct}%)` : 'Tip',
+    totalPay:'Total to pay',
+    noHist:'Save at least one bill first',
+    backConfirm:'Go back? Current items will be lost.',
+    taxTitle:'Taxes', taxFoodRow:'Food tax', taxAlcRow:'Alcohol tax',
+    taxNote:'Puerto Rico rates. Change if you are in another country.',
+    taxNoteCustom:'Custom tax rates active.',
+    taxBadgePR:'Puerto Rico', taxBadgeCustom:'Custom',
+    taxReset:'PR Default',
+    imgErr:'Format not supported.\nUse JPG, PNG or WebP.',
+    imgConvErr:'Error converting image. Try another photo.',
+    imgFmtErr:'Could not read image.\nFormats: JPG, PNG, WebP, HEIC (iOS).',
+    imgBadErr:'Image not processed correctly. Please reselect.',
+    noItems:'No items detected.\nMake sure photo is clear, or enter manually.',
+    ocrErr:'Error reading receipt.\nYou can enter items manually.',
+    processing:'Processing image...',
+    nameHold:'Item name...', priceHold:'$0.00',
+    restHold:'Name...', nameF:'Name', priceF:'Price',
+    alcohol:'Alcohol', del:'Remove',
+  }
+};
+let L = T[lang];
+
+function setLang(l) {
+  lang = l; L = T[l];
+  localStorage.setItem('frac_lang', l);
+  applyLang();
+}
+
+function applyLang() {
+  L = T[lang];
+  const ids = {
+    'logo-tag': L.tagline,
+    'cam-lbl': L.cam, 'gal-lbl': L.gal,
+    'people-title': L.people,
+    'scan-btn': L.scan,
+    'manual-lbl': L.manual,
+    'scan-h': L.scanH, 'scan-provider-label': L.scanP,
+    's1-txt': L.s1, 's2-txt': L.s2, 's3-txt': L.s3,
+    'drag-lbl': L.drag,
+    'back-s': L.backS, 'back-r': L.backR,
+    'tip-lbl': L.tip, 'tip-fix-lbl': L.tipFix,
+    'tip-s0': L.tipStd, 'tip-s1': L.tipGood, 'tip-s2': L.tipGreat, 'tip-s3': L.tipWow,
+    'hist-t': L.histT, 'hist-s': L.histS,
+    'modal-q': L.modalQ,
+    'tax-title': L.taxTitle,
+    'tax-food-lbl': L.taxFoodRow, 'tax-alc-lbl': L.taxAlcRow,
+  };
+  Object.entries(ids).forEach(([id,txt])=>{const el=document.getElementById(id);if(el)el.textContent=txt;});
+  // placeholders
+  const ph = {'rest-in':L.restHold,'ni-name':L.nameHold};
+  Object.entries(ph).forEach(([id,p])=>{const el=document.getElementById(id);if(el)el.placeholder=p;});
+  // lang toggle
+  const btn = document.getElementById('lang-btn');
+  if(btn) btn.textContent = lang==='es'?'EN':'ES';
+  // update tax note & badge
+  updateTaxUI();
+  // re-render if active
+  if(document.getElementById('v-split')?.classList.contains('show')){renderItems();renderDropZones();updProgress();}
+  if(document.getElementById('v-results')?.classList.contains('show')) renderCards();
+  if(document.getElementById('v-hist')?.classList.contains('show')) renderHist();
+}
+
+// ── TAX FUNCTIONS ──
+function onTaxChange() {
+  taxFood = parseFloat(document.getElementById('tax-food-inp').value) || 0;
+  taxAlc  = parseFloat(document.getElementById('tax-alc-inp').value)  || 0;
+  localStorage.setItem('frac_tf', taxFood);
+  localStorage.setItem('frac_ta', taxAlc);
+  updateTaxUI();
+  renderCards();
+}
+
+function resetTax() {
+  taxFood = FOOD_PR; taxAlc = ALC_PR;
+  localStorage.removeItem('frac_tf');
+  localStorage.removeItem('frac_ta');
+  document.getElementById('tax-food-inp').value = FOOD_PR;
+  document.getElementById('tax-alc-inp').value  = ALC_PR;
+  updateTaxUI();
+  renderCards();
+}
+
+function updateTaxUI() {
+  const custom = taxFood !== FOOD_PR || taxAlc !== ALC_PR;
+  const badge  = document.getElementById('tax-badge-txt');
+  const note   = document.getElementById('tax-note');
+  const rst    = document.getElementById('tax-reset-btn');
+  if(badge) badge.textContent = custom ? L.taxBadgeCustom : L.taxBadgePR;
+  if(note)  note.textContent  = custom ? L.taxNoteCustom  : L.taxNote;
+  if(rst)   rst.style.display = custom ? 'block' : 'none';
+}
+
+function initTaxPanel() {
+  document.getElementById('tax-food-inp').value = taxFood;
+  document.getElementById('tax-alc-inp').value  = taxAlc;
+  updateTaxUI();
+}
+
+// ── APP STATE ──
 let persons=[],items=[],curItem=null,selPers=[];
 let tipPct=0,tipFix=null,tipMode='pct';
 let imgB64=null,imgMime='image/jpeg';
 let pCount=2,newQty=1;
 let hist=JSON.parse(localStorage.getItem('sc_h')||'[]');
 
+// ── NAV ──
 function navTo(t){
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   document.getElementById('nb-'+t)?.classList.add('on');
@@ -1163,56 +1404,39 @@ function navTo(t){
   else exportCSV();
 }
 
+// ── FILE / IMAGE ──
 function triggerCamera(){document.getElementById('inp-cam').click();}
 function triggerGallery(){document.getElementById('inp-gal').value='';document.getElementById('inp-gal').click();}
 
 function onFile(input){
-  const file=input.files[0];
-  if(!file) return;
+  const file=input.files[0];if(!file)return;
   document.getElementById('photo-btns').style.display='none';
-  showImgStatus('Procesando imagen...');
+  showImgStatus(L.processing);
   const objURL=URL.createObjectURL(file);
   const img=new Image();
   img.onload=()=>{
     const w0=img.naturalWidth,h0=img.naturalHeight;
-    if(!w0||!h0){
-      URL.revokeObjectURL(objURL);showImgStatus('');
-      document.getElementById('photo-btns').style.display='grid';
-      alert('Este formato de imagen no es compatible con tu navegador.\nUsa JPG, PNG o WebP.');
-      return;
-    }
+    if(!w0||!h0){URL.revokeObjectURL(objURL);showImgStatus('');document.getElementById('photo-btns').style.display='grid';alert(L.imgErr);return;}
     const MAX=1800,scale=Math.min(1,MAX/Math.max(w0,h0));
     const w=Math.round(w0*scale),h=Math.round(h0*scale);
-    const canvas=document.createElement('canvas');
-    canvas.width=w;canvas.height=h;
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
     canvas.getContext('2d').drawImage(img,0,0,w,h);
     URL.revokeObjectURL(objURL);
     const jpeg=canvas.toDataURL('image/jpeg',0.88);
-    if(!jpeg||jpeg==='data:,'){
-      showImgStatus('');document.getElementById('photo-btns').style.display='grid';
-      alert('Error al convertir la imagen. Intenta con otra foto.');return;
-    }
+    if(!jpeg||jpeg==='data:,'){showImgStatus('');document.getElementById('photo-btns').style.display='grid';alert(L.imgConvErr);return;}
     imgB64=jpeg.split(',')[1];imgMime='image/jpeg';
     document.getElementById('prev-img').src=jpeg;
     document.getElementById('prev-w').style.display='block';
     showImgStatus('');
     document.getElementById('scan-btn').disabled=false;
   };
-  img.onerror=()=>{
-    URL.revokeObjectURL(objURL);showImgStatus('');
-    document.getElementById('photo-btns').style.display='grid';
-    alert('No se pudo leer esta imagen.\n\nFormatos compatibles: JPG, PNG, WebP, HEIC (iOS), BMP.\n\nSi es HEIC, asegúrate de abrir el app en Safari (iOS) o Chrome (Android).');
-  };
+  img.onerror=()=>{URL.revokeObjectURL(objURL);showImgStatus('');document.getElementById('photo-btns').style.display='grid';alert(L.imgFmtErr);};
   img.src=objURL;
 }
 
 function showImgStatus(msg){
   let el=document.getElementById('img-status');
-  if(!el){
-    el=document.createElement('div');el.id='img-status';
-    el.style.cssText='text-align:center;padding:20px;color:var(--gold);font-size:13px;font-weight:600;';
-    document.getElementById('photo-btns').parentNode.insertBefore(el,document.getElementById('photo-btns').nextSibling);
-  }
+  if(!el){el=document.createElement('div');el.id='img-status';el.style.cssText='text-align:center;padding:20px;color:var(--gold);font-size:13px;font-weight:600;';document.getElementById('prev-w').before(el);}
   el.textContent=msg;el.style.display=msg?'block':'none';
 }
 
@@ -1224,6 +1448,7 @@ function changePhoto(){
   document.getElementById('scan-btn').disabled=true;
 }
 
+// ── PERSONS ──
 function changeCount(d){pCount=Math.max(1,Math.min(6,pCount+d));document.getElementById('cnt').textContent=pCount;renderPNameInputs();}
 function renderPNameInputs(){
   const c=document.getElementById('pname-list');
@@ -1231,8 +1456,7 @@ function renderPNameInputs(){
   c.innerHTML='';
   for(let i=0;i<pCount;i++){
     const r=document.createElement('div');r.className='pn-row';
-    r.innerHTML=`<div class="pav-sm ${COLORS[i]}">${LABELS[i]}</div>
-      <input type="text" placeholder="Persona ${i+1}" value="${old[i]||''}" id="pn-${i}">`;
+    r.innerHTML=`<div class="pav-sm ${COLORS[i]}">${LABELS[i]}</div><input type="text" placeholder="${L.personN(i+1)}" value="${old[i]||''}" id="pn-${i}">`;
     c.appendChild(r);
   }
 }
@@ -1242,94 +1466,75 @@ document.getElementById('date-in').value=new Date().toISOString().split('T')[0];
 function buildPersons(){
   persons=[];
   for(let i=0;i<pCount;i++){
-    const v=document.getElementById(`pn-${i}`)?.value.trim()||`Persona ${i+1}`;
+    const v=document.getElementById(`pn-${i}`)?.value.trim()||L.personN(i+1);
     persons.push({id:i,name:v,color:COLORS[i],label:LABELS[i]});
   }
 }
 
 function chQty(d){newQty=Math.max(1,Math.min(20,newQty+d));document.getElementById('qty-disp').textContent=newQty;}
 
+// ── SCAN (Tesseract OCR) ──
 async function startScan(){
-  if(!imgB64||imgB64.length<100){alert('La imagen no se procesó correctamente. Vuelve a seleccionarla.');return;}
+  if(!imgB64||imgB64.length<100){alert(L.imgBadErr);return;}
   buildPersons();showV('v-scanning');
   const lbl=document.getElementById('scan-provider-label');
-  if(lbl) lbl.textContent='Preparando OCR...';
+  if(lbl)lbl.textContent=L.s1+'...';
   try{
-    const byteChars=atob(imgB64);
-    const byteArr=new Uint8Array(byteChars.length);
-    for(let i=0;i<byteChars.length;i++) byteArr[i]=byteChars.charCodeAt(i);
+    const byteChars=atob(imgB64);const byteArr=new Uint8Array(byteChars.length);
+    for(let i=0;i<byteChars.length;i++)byteArr[i]=byteChars.charCodeAt(i);
     const blob=new Blob([byteArr],{type:'image/jpeg'});
     const imgUrl=URL.createObjectURL(blob);
     const worker=await Tesseract.createWorker('spa+eng',1,{
-      logger:m=>{
-        if(m.status==='recognizing text'){
-          markS('s1','s2');
-          if(lbl) lbl.textContent='Reconociendo texto...';
-        }
-      }
+      logger:m=>{if(m.status==='recognizing text'){markS('s1','s2');if(lbl)lbl.textContent=L.s2+'...';}}
     });
     markS('s1','s2');
-    const {data:{text}}=await worker.recognize(imgUrl);
-    await worker.terminate();
-    URL.revokeObjectURL(imgUrl);
-    markS('s2','s3');
-    if(lbl) lbl.textContent='Analizando líneas...';
+    const{data:{text}}=await worker.recognize(imgUrl);
+    await worker.terminate();URL.revokeObjectURL(imgUrl);
+    markS('s2','s3');if(lbl)lbl.textContent=L.s3+'...';
 
     const IGNORE=/^(subtotal|sub-total|total tax|total|balance due|balance|municipal tax|munincipal tax|reducido tax|estate tax|state tax|excise tax|iva|ivu|itbms|tax|change|cash due|visa|mastercard|amex|discover|auth|approval|gratuity|service charge|mesa|table|check #|receipt|server:|cashier|cajero|guests?:|phone|tel:|fax|www\.|http|tip is|gracias|thank you|suggested|\d+%\s*=)/i;
-    const ALCOHOL=/beer|cerveza|vino|wine|ron|rum|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|liquor|champagne|sangria|mojito|mule|moscow|blond|ipa|lager|seltzer|pale ale|draft|draught|coors|budweiser|bud |heineken|smirnoff|baileys|kahlua|malibu|hennessy|jack daniel|patron|bacardi|jose cuervo/i;
+    const ALCOHOL=/beer|cerveza|vino|wine|ron|rum|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|liquor|champagne|sangria|mojito|mule|moscow|blond|ipa|lager|seltzer|pale ale|draft|draught|coors|budweiser|bud |smirnoff|baileys|kahlua|malibu|hennessy|jack daniel|patron|bacardi|jose cuervo/i;
     const PRICE=/[$]?\s*(\d{1,3}(?:[.]\d{2}))\s*$/;
     const QTY_AT=/^(.+?)\s*\(?\s*(\d+)\s*@\s*(\d+(?:\.\d{2})?)\s*\)?/;
 
     const lines=text.split('\n').map(l=>l.trim().replace(/\s+/g,' ')).filter(Boolean);
     items=[];let idx=0;
-
-    lines.forEach((line)=>{
-      if(line.length<3||/^\d+$/.test(line)) return;
-      if(IGNORE.test(line)) return;
+    lines.forEach(line=>{
+      if(line.length<3||/^\d+$/.test(line)||IGNORE.test(line))return;
       const qm=line.match(QTY_AT);
       if(qm){
-        const name=qm[1].trim();const qty=parseInt(qm[2]);const unitPrice=parseFloat(qm[3]);
+        const name=qm[1].trim(),qty=parseInt(qm[2]),unitPrice=parseFloat(qm[3]);
         if(name.length>=2&&qty>=1&&qty<=20&&unitPrice>0&&unitPrice<=999){
-          for(let q=0;q<qty;q++){
-            items.push({id:Date.now()+idx*100+(q*7),name:qty>1?`${name} (${q+1}/${qty})`:name,price:unitPrice,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
-          }
+          for(let q=0;q<qty;q++)items.push({id:Date.now()+idx*100+(q*7),name:qty>1?`${name} (${q+1}/${qty})`:name,price:unitPrice,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
           idx++;return;
         }
       }
       const m=line.match(PRICE);
       if(m){
         const price=parseFloat(m[1]);
-        if(price<=0||price>999) return;
+        if(price<=0||price>999)return;
         const name=line.slice(0,line.lastIndexOf(m[0])).replace(/[$]/g,'').trim();
-        if(name.length<2) return;
+        if(name.length<2)return;
         items.push({id:Date.now()+idx*100,name,price,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
         idx++;
       }
     });
-
     markS('s3');
-    if(items.length===0){
-      alert('No se detectaron artículos.\nVerifica que la foto sea clara e iluminada, o ingresa manualmente.');
-      buildPersons();initSplit();return;
-    }
+    if(items.length===0){alert(L.noItems);buildPersons();initSplit();return;}
     setTimeout(()=>initSplit(),350);
-  }catch(err){
-    console.error('OCR error:',err);
-    alert('Error al leer el recibo.\nPuedes ingresar los artículos manualmente.');
-    buildPersons();items=[];initSplit();
-  }
+  }catch(err){console.error(err);alert(L.ocrErr);buildPersons();items=[];initSplit();}
 }
 
 function markS(dId,nId){
-  const d=document.getElementById(dId);
-  if(d){d.classList.remove('on');d.classList.add('done');}
+  const d=document.getElementById(dId);if(d){d.classList.remove('on');d.classList.add('done');}
   if(nId){const n=document.getElementById(nId);if(n)n.classList.add('on');}
 }
 function manualMode(){buildPersons();items=[];initSplit();}
 
+// ── SPLIT ──
 function initSplit(){
   showV('v-split');
-  document.getElementById('sp-rest').textContent=document.getElementById('rest-in').value||'Restaurante';
+  document.getElementById('sp-rest').textContent=document.getElementById('rest-in').value||L.rest;
   document.getElementById('sp-dt').textContent=fmtDate(document.getElementById('date-in').value);
   renderDropZones();renderItems();updProgress();
   newQty=1;document.getElementById('qty-disp').textContent='1';
@@ -1342,75 +1547,54 @@ function renderDropZones(){
   c.innerHTML=persons.map(p=>{
     const cnt=items.filter(i=>i.assignedTo.includes(p.id)).length;
     const amt=items.reduce((s,i)=>i.assignedTo.includes(p.id)?s+i.price/i.assignedTo.length:s,0);
-    return`<div class="drop-zone ${cnt>0?'has-items':''}" id="dz-${p.id}"
-      data-pid="${p.id}"
-      ondragover="dzOver(event,${p.id})"
-      ondragleave="dzLeave(${p.id},event)"
-      ondrop="dzDrop(event,${p.id})"
+    return`<div class="drop-zone ${cnt>0?'has-items':''}" id="dz-${p.id}" data-pid="${p.id}"
+      ondragover="dzOver(event,${p.id})" ondragleave="dzLeave(${p.id},event)" ondrop="dzDrop(event,${p.id})"
       onclick="dzTap(${p.id})">
       <div class="dz-av ${p.color}">${p.label}</div>
       <div class="dz-name">${p.name}</div>
-      <div class="dz-amt">$${f(amt)}</div>
-      ${cnt>0?`<div class="dz-count">${cnt} art.</div>`:''}
+      <div class="dz-amt">$${f2(amt)}</div>
+      ${cnt>0?`<div class="dz-count">${L.artN(cnt)}</div>`:''}
     </div>`;
   }).join('');
 }
 
 let dragId=null;
-function onDragStart(e,id){
-  dragId=id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(id));
-  setTimeout(()=>document.getElementById('ic-'+id)?.classList.add('dragging'),0);
-}
+function onDragStart(e,id){dragId=id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(id));setTimeout(()=>document.getElementById('ic-'+id)?.classList.add('dragging'),0);}
 function onDragEnd(id){document.getElementById('ic-'+id)?.classList.remove('dragging');dragId=null;}
 function dzOver(e,pid){e.preventDefault();e.stopPropagation();document.getElementById('dz-'+pid)?.classList.add('drag-over');}
-function dzLeave(pid,e){
-  const dz=document.getElementById('dz-'+pid);if(!dz)return;
-  if(e&&dz.contains(e.relatedTarget))return;
-  dz.classList.remove('drag-over');
-}
-function dzDrop(e,pid){
-  e.preventDefault();dzLeave(pid);
-  const id=parseInt(e.dataTransfer.getData('text/plain')||dragId);
-  if(isNaN(id))return;
-  assignItemToPerson(id,pid);
-}
+function dzLeave(pid,e){const dz=document.getElementById('dz-'+pid);if(!dz)return;if(e&&dz.contains(e.relatedTarget))return;dz.classList.remove('drag-over');}
+function dzDrop(e,pid){e.preventDefault();dzLeave(pid);const id=parseInt(e.dataTransfer.getData('text/plain')||dragId);if(!isNaN(id))assignItemToPerson(id,pid);}
+function dzTap(pid){}
 
-let touchDragId=null,ghost=null,touchStartY=0,touchStartX=0,movedEnough=false;
+let touchDragId=null,ghost=null,touchSX=0,touchSY=0,movedEnough=false,tTimer=null;
 function onTouchStart(e,id){
-  touchDragId=id;movedEnough=false;
-  touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;
-  touchTimer=setTimeout(()=>{
+  touchDragId=id;movedEnough=false;touchSX=e.touches[0].clientX;touchSY=e.touches[0].clientY;
+  tTimer=setTimeout(()=>{
     const item=items.find(i=>i.id===id);if(!item)return;
-    movedEnough=true;
-    document.getElementById('ic-'+id)?.classList.add('dragging');
+    movedEnough=true;document.getElementById('ic-'+id)?.classList.add('dragging');
     ghost=document.getElementById('drag-ghost');
-    ghost.textContent=item.name+' · $'+f(item.price);
-    ghost.style.display='block';
-    ghost.style.left=touchStartX+'px';ghost.style.top=touchStartY+'px';
+    ghost.textContent=item.name+' · $'+f2(item.price);
+    ghost.style.display='block';ghost.style.left=touchSX+'px';ghost.style.top=touchSY+'px';
   },180);
 }
-let touchTimer=null;
 function onTouchMove(e){
   if(!touchDragId)return;
   const t=e.touches[0];
-  const dx=Math.abs(t.clientX-touchStartX),dy=Math.abs(t.clientY-touchStartY);
-  if(dx>8||dy>8){clearTimeout(touchTimer);}
+  if(Math.abs(t.clientX-touchSX)>8||Math.abs(t.clientY-touchSY)>8)clearTimeout(tTimer);
   if(!movedEnough)return;
   e.preventDefault();
   if(ghost){ghost.style.left=t.clientX+'px';ghost.style.top=t.clientY+'px';}
   document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('drag-over'));
-  const el=document.elementFromPoint(t.clientX,t.clientY);
-  const dz=el?.closest('.drop-zone');if(dz)dz.classList.add('drag-over');
+  document.elementFromPoint(t.clientX,t.clientY)?.closest('.drop-zone')?.classList.add('drag-over');
 }
 function onTouchEnd(e){
-  clearTimeout(touchTimer);
+  clearTimeout(tTimer);
   if(ghost){ghost.style.display='none';ghost=null;}
   document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('drag-over'));
   if(!movedEnough||!touchDragId){touchDragId=null;return;}
   const t=e.changedTouches[0];
-  const el=document.elementFromPoint(t.clientX,t.clientY);
-  const dz=el?.closest('.drop-zone');
-  if(dz){const pid=parseInt(dz.dataset.pid);assignItemToPerson(touchDragId,pid);}
+  const dz=document.elementFromPoint(t.clientX,t.clientY)?.closest('.drop-zone');
+  if(dz)assignItemToPerson(touchDragId,parseInt(dz.dataset.pid));
   document.getElementById('ic-'+touchDragId)?.classList.remove('dragging');
   touchDragId=null;movedEnough=false;
 }
@@ -1419,13 +1603,8 @@ document.addEventListener('touchend',onTouchEnd);
 
 function assignItemToPerson(itemId,pid){
   const item=items.find(i=>i.id===itemId);if(!item)return;
-  if(!item.assignedTo.includes(pid)) item.assignedTo.push(pid);
+  if(!item.assignedTo.includes(pid))item.assignedTo.push(pid);
   renderItems();renderDropZones();updProgress();
-}
-
-function dzTap(pid){
-  const unassigned=items.filter(i=>i.assignedTo.length===0);
-  if(!unassigned.length)return;
 }
 
 function isAlcN(n){return ALC.some(k=>n.toLowerCase().includes(k));}
@@ -1434,33 +1613,30 @@ function itemHTML(item,assigned){
   const chips=item.assignedTo.map(pid=>{const p=persons.find(x=>x.id===pid);return p?`<span class="ac ${p.color}">${p.label} ${p.name}</span>`:''}).join('');
   const alc=item.isAlcohol||isAlcN(item.name);
   const eico=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
-  /* drag-icon: 6-dot grid, top-right */
   const dragIco=`<svg class="drag-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="3" cy="2" r="1"/><circle cx="9" cy="2" r="1"/><circle cx="3" cy="6" r="1"/><circle cx="9" cy="6" r="1"/><circle cx="3" cy="10" r="1"/><circle cx="9" cy="10" r="1"/></svg>`;
   return`<div class="ic ${assigned?'assigned':''}" id="ic-${item.id}"
-    draggable="true"
-    ondragstart="onDragStart(event,${item.id})"
-    ondragend="onDragEnd(${item.id})"
+    draggable="true" ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd(${item.id})"
     ontouchstart="onTouchStart(event,${item.id})">
     ${dragIco}
     <div class="ic-body" onclick="openModal(${item.id})">
       <div class="il">
         <div class="in">${escH(item.name)}</div>
-        <span class="ib">${alc?'Alcohol · 11.5%':'Comida · 7%'}</span>
+        <span class="ib">${alc?L.alcBadge():L.foodBadge()}</span>
         ${assigned?`<div class="achips">${chips}</div>`:''}
       </div>
       <div class="ir">
-        <span class="ip">$${f(item.price)}</span>
+        <span class="ip">$${f2(item.price)}</span>
         <button class="eb" onclick="event.stopPropagation();togEdit(${item.id})">${eico}</button>
       </div>
     </div>
     <div class="ie" id="ie-${item.id}">
       <div class="er">
-        <input type="text" placeholder="Nombre" value="${escA(item.name)}" oninput="updF(${item.id},'name',this.value)">
-        <input type="number" placeholder="Precio" value="${item.price||''}" step="0.01" min="0" oninput="updF(${item.id},'price',parseFloat(this.value)||0)">
+        <input type="text" placeholder="${L.nameF}" value="${escA(item.name)}" oninput="updF(${item.id},'name',this.value)">
+        <input type="number" placeholder="${L.priceF}" value="${item.price||''}" step="0.01" min="0" oninput="updF(${item.id},'price',parseFloat(this.value)||0)">
       </div>
       <div class="ea">
-        <label class="alt"><input type="checkbox" ${alc?'checked':''} onchange="updF(${item.id},'isAlcohol',this.checked)"> Alcohol</label>
-        <button class="bdel" onclick="delItem(${item.id})">Eliminar</button>
+        <label class="alt"><input type="checkbox" ${alc?'checked':''} onchange="updF(${item.id},'isAlcohol',this.checked)"> ${L.alcohol}</label>
+        <button class="bdel" onclick="delItem(${item.id})">${L.del}</button>
       </div>
     </div>
   </div>`;
@@ -1468,14 +1644,9 @@ function itemHTML(item,assigned){
 
 function togEdit(id){document.getElementById('ie-'+id)?.classList.toggle('open');}
 function updF(id,fld,v){
-  const item=items.find(i=>i.id===id);if(!item)return;
-  item[fld]=v;
+  const item=items.find(i=>i.id===id);if(!item)return;item[fld]=v;
   if(fld==='price'){const el=document.querySelector('#ic-'+id+' .ip');if(el)el.textContent='$'+f2(v);updAmts();updProgress();}
-  if(fld==='name'||fld==='isAlcohol'){
-    const alc=item.isAlcohol||isAlcN(item.name);
-    const b=document.querySelector('#ic-'+id+' .ib');
-    if(b)b.textContent=alc?'Alcohol · 11.5%':'Comida · 7%';
-  }
+  if(fld==='name'||fld==='isAlcohol'){const alc=item.isAlcohol||isAlcN(item.name);const b=document.querySelector('#ic-'+id+' .ib');if(b)b.textContent=alc?L.alcBadge():L.foodBadge();}
 }
 function delItem(id){items=items.filter(i=>i.id!==id);renderItems();renderDropZones();updProgress();}
 
@@ -1484,7 +1655,7 @@ function addItem(){
   const price=parseFloat(document.getElementById('ni-price').value)||0;
   const isAlc=document.getElementById('ni-alc').checked||isAlcN(name);
   if(!name&&!price)return;
-  for(let q=0;q<newQty;q++) items.unshift({id:Date.now()+q,name:name||'Artículo',price,isAlcohol:isAlc,assignedTo:[]});
+  for(let q=0;q<newQty;q++)items.unshift({id:Date.now()+q,name:name||L.nameHold,price,isAlcohol:isAlc,assignedTo:[]});
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
   newQty=1;document.getElementById('qty-disp').textContent='1';
@@ -1497,7 +1668,7 @@ function renderItems(){
   const as=items.filter(i=>i.assignedTo.length>0);
   document.getElementById('unassigned').innerHTML=un.length
     ?un.map(i=>itemHTML(i,false)).join('')
-    :`<div class="all-done">Todos los artículos asignados</div>`;
+    :`<div class="all-done">${L.allDone}</div>`;
   document.getElementById('assigned').innerHTML=as.map(i=>itemHTML(i,true)).join('');
   document.getElementById('assigned-sec').style.display=as.length?'block':'none';
   updAmts();
@@ -1510,8 +1681,8 @@ function updAmts(){
     const dz=document.getElementById('dz-'+p.id);if(!dz)return;
     const amtEl=dz.querySelector('.dz-amt');if(amtEl)amtEl.textContent='$'+f2(t);
     const cntEl=dz.querySelector('.dz-count');
-    if(cnt>0&&!cntEl){const d=document.createElement('div');d.className='dz-count';d.textContent=cnt+' art.';dz.appendChild(d);}
-    else if(cntEl)cntEl.textContent=cnt>0?cnt+' art.':'';
+    if(cnt>0&&!cntEl){const d=document.createElement('div');d.className='dz-count';d.textContent=L.artN(cnt);dz.appendChild(d);}
+    else if(cntEl)cntEl.textContent=cnt>0?L.artN(cnt):'';
     dz.classList.toggle('has-items',cnt>0);
   });
 }
@@ -1520,10 +1691,11 @@ function updProgress(){
   const total=items.filter(i=>i.price>0).length;
   const done=items.filter(i=>i.price>0&&i.assignedTo.length>0).length;
   document.getElementById('pf').style.width=(total>0?(done/total)*100:0)+'%';
-  document.getElementById('pt').textContent=`${done} de ${total} asignados`;
+  document.getElementById('pt').textContent=L.ofN(done,total);
   document.getElementById('sp-tot').textContent='$'+f2(items.reduce((s,i)=>s+(i.price>0?i.price:0),0));
 }
 
+// ── MODAL ──
 function openModal(itemId){
   const item=items.find(i=>i.id===itemId);if(!item)return;
   curItem=itemId;selPers=[...item.assignedTo];
@@ -1539,27 +1711,21 @@ function openModal(itemId){
   document.getElementById('overlay').classList.add('show');
 }
 function togMP(pid){
-  const i=selPers.indexOf(pid);
-  if(i>-1)selPers.splice(i,1);else selPers.push(pid);
-  document.querySelectorAll('.mpb').forEach(b=>{
-    const id=parseInt(b.dataset.pid),s=selPers.includes(id);
-    b.classList.toggle('sel',s);b.querySelector('.mpc').textContent=s?'✓':'';
-  });
+  const i=selPers.indexOf(pid);if(i>-1)selPers.splice(i,1);else selPers.push(pid);
+  document.querySelectorAll('.mpb').forEach(b=>{const id=parseInt(b.dataset.pid),s=selPers.includes(id);b.classList.toggle('sel',s);b.querySelector('.mpc').textContent=s?'✓':'';});
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('overlay').classList.remove('show');curItem=null;selPers=[];}
-function confirmAssign(){
-  const item=items.find(i=>i.id===curItem);
-  if(item)item.assignedTo=[...selPers];
-  closeModal();renderItems();renderDropZones();updProgress();
-}
+function confirmAssign(){const item=items.find(i=>i.id===curItem);if(item)item.assignedTo=[...selPers];closeModal();renderItems();renderDropZones();updProgress();}
 
+// ── RESULTS ──
 function goResults(){
   tipPct=0;tipFix=null;tipMode='pct';
   document.getElementById('tip-fix').value='';
-  showV('v-results');
-  document.getElementById('r-rest').textContent=document.getElementById('rest-in').value||'Restaurante';
-  document.getElementById('r-date').textContent=fmtDate(document.getElementById('date-in').value);
   document.querySelectorAll('.tp').forEach(b=>b.classList.remove('sel'));
+  showV('v-results');
+  document.getElementById('r-rest').textContent=document.getElementById('rest-in').value||L.rest;
+  document.getElementById('r-date').textContent=fmtDate(document.getElementById('date-in').value);
+  initTaxPanel();
   renderCards();
 }
 
@@ -1578,7 +1744,7 @@ function calcRes(){
       if(alc)as+=sh;else fs+=sh;
       mi.push({name:i.name,share:sh,isAlcohol:alc});
     });
-    const ms=fs+as,ft=fs*.07,at=as*.115,ts=sub>0?tot*(ms/sub):0;
+    const ms=fs+as,ft=fs*(taxFood/100),at=as*(taxAlc/100),ts=sub>0?tot*(ms/sub):0;
     return{...p,fs,as,ft,at,ts,total:ms+ft+at+ts,mi};
   });
   return{ps,grand:ps.reduce((s,p)=>s+p.total,0),tot};
@@ -1592,18 +1758,19 @@ function renderCards(){
     return`<div class="glass-bright pc">
       <div class="ph"><div class="pav ${p.color}">${p.label}</div><div class="pnm">${p.name}</div><div class="ptot">$${f2(p.total)}</div></div>
       ${p.mi.map(i=>`<div class="pi"><span>${escH(i.name)}${i.isAlcohol?' · alc':''}</span><span>$${f2(Math.max(0,i.share))}</span></div>`).join('')}
-      ${p.fs>0?`<div class="pl"><span>Tax comida (7%)</span><span>$${f2(p.ft)}</span></div>`:''}
-      ${p.as>0?`<div class="pl"><span>Tax alcohol (11.5%)</span><span>$${f2(p.at)}</span></div>`:''}
-      ${p.ts>0.01?`<div class="pl"><span>Propina${tipPct?` (${tipPct}%)`:''}</span><span>$${f2(p.ts)}</span></div>`:''}
-      <div class="pl tot"><span>Total a pagar</span><span style="color:var(--a)">$${f2(p.total)}</span></div>
+      ${p.fs>0?`<div class="pl"><span>${L.taxFoodLbl()}</span><span>$${f2(p.ft)}</span></div>`:''}
+      ${p.as>0?`<div class="pl"><span>${L.taxAlcLbl()}</span><span>$${f2(p.at)}</span></div>`:''}
+      ${p.ts>0.01?`<div class="pl"><span>${L.tipLbl(tipPct)}</span><span>$${f2(p.ts)}</span></div>`:''}
+      <div class="pl tot"><span>${L.totalPay}</span><span style="color:var(--gold)">$${f2(p.total)}</span></div>
     </div>`;
   }).join('');
 }
 
+// ── HISTORY ──
 function renderHist(){
   const c=document.getElementById('hist-list');
   if(!hist.length){
-    c.innerHTML=`<div class="he"><div style="font-size:32px;opacity:.15;margin-bottom:12px;font-family:var(--mono)">—</div><div style="font-size:14px;font-weight:700;margin-bottom:5px;letter-spacing:-.02em">Sin visitas aún</div><div style="font-size:12px">Completa una cuenta y guárdala</div></div>`;
+    c.innerHTML=`<div class="he"><div style="font-size:32px;opacity:.15;margin-bottom:12px;font-family:var(--mono)">—</div><div style="font-size:14px;font-weight:700;margin-bottom:5px;letter-spacing:-.02em">${L.noVisit}</div><div style="font-size:12px">${L.noVisitS}</div></div>`;
     return;
   }
   c.innerHTML=hist.map(e=>`
@@ -1611,15 +1778,16 @@ function renderHist(){
       <div class="hh"><div><div class="hr">${e.restaurant}</div><div class="hd">${fmtDate(e.date)}</div></div><div class="ht">$${f2(e.grandTotal)}</div></div>
       <div class="hp">
         ${e.persons.filter(p=>p.total>0).map(p=>`<span class="hc">${p.name}: $${f2(p.total)}</span>`).join('')}
-        ${e.tipTotal>0?`<span class="hc g">Propina: $${f2(e.tipTotal)}</span>`:''}
+        ${e.tipTotal>0?`<span class="hc g">${L.tip}: $${f2(e.tipTotal)}</span>`:''}
       </div>
     </div>`).join('');
 }
 
+// ── SAVE & EXPORT ──
 function saveNew(){
   const{ps,grand,tot}=calcRes();
   hist.unshift({id:Date.now(),date:document.getElementById('date-in').value,
-    restaurant:document.getElementById('rest-in').value||'Restaurante',
+    restaurant:document.getElementById('rest-in').value||L.rest,
     persons:ps.map(p=>({name:p.name,total:p.total})),tipTotal:tot,grandTotal:grand});
   localStorage.setItem('sc_h',JSON.stringify(hist));
   items=[];persons=[];imgB64=null;imgMime='image/jpeg';
@@ -1636,7 +1804,7 @@ function saveNew(){
 
 const PNAMES=['Persona 1','Persona 2','Persona 3','Persona 4','Persona 5','Persona 6'];
 function exportCSV(){
-  if(!hist.length){alert('Guarda al menos una cuenta primero');return;}
+  if(!hist.length){alert(L.noHist);return;}
   const h=['Fecha','Restaurante',...PNAMES,'Propina ($)','Total'];
   const rows=hist.map(e=>{
     const a=PNAMES.map((_,i)=>{const p=e.persons[i];return p?f2(p.total):'0.00';});
@@ -1647,6 +1815,7 @@ function exportCSV(){
   const a=document.createElement('a');a.href=url;a.download='Frac_historial.csv';a.click();URL.revokeObjectURL(url);
 }
 
+// ── UTILS ──
 function showV(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id===id));const el=document.getElementById(id);if(el){const s=el.querySelector('.scroll');if(s)s.scrollTop=0;}}
 function f2(n){return parseFloat(n||0).toFixed(2);}
 function f(n){return parseFloat(n||0).toFixed(2);}
@@ -1654,19 +1823,19 @@ function fmtDate(d){if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m
 function escH(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escA(s){return(s||'').replace(/"/g,'&quot;');}
 
+function backToUpload(){if(items.length>0){if(!confirm(L.backConfirm))return;}items=[];persons=[];showV('v-upload');}
+function backToSplit(){showV('v-split');renderDropZones();renderItems();updProgress();}
+
 document.getElementById('ni-price')?.addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
 document.getElementById('ni-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ni-price')?.focus();});
 
-function backToUpload(){
-  if(items.length>0){if(!confirm('¿Volver al inicio? Se perderán los artículos actuales.'))return;}
-  items=[];persons=[];showV('v-upload');
-}
-function backToSplit(){
-  showV('v-split');renderDropZones();renderItems();updProgress();
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', ()=>{ applyLang(); });
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
 }
 </script>
-</body>
-</html>
-
 </body>
 </html>
