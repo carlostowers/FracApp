@@ -984,7 +984,7 @@ label {
   border-radius: var(--r-sm);
   border: 1px solid rgba(201,168,76,.20);
   background: #000;
-  touch-action: none;
+  touch-action: pan-x pan-y pinch-zoom;
   max-height: 320px;
 }
 .receipt-overlay-wrap img {
@@ -1204,8 +1204,12 @@ label {
         <div class="receipt-tap-hint" id="receipt-tap-hint">Toca el recibo para leer artículos</div>
         <!-- Zoom controls -->
         <div class="receipt-zoom-bar">
-          <div class="zoom-btn" ontouchstart="zoomIn();event.stopPropagation()" onclick="zoomIn();event.stopPropagation()">+</div>
-          <div class="zoom-btn" ontouchstart="zoomOut();event.stopPropagation()" onclick="zoomOut();event.stopPropagation()">−</div>
+          <div class="zoom-btn"
+            ontouchstart="event.stopPropagation();event.preventDefault();zoomIn()"
+            onclick="zoomIn();event.stopPropagation()">+</div>
+          <div class="zoom-btn"
+            ontouchstart="event.stopPropagation();event.preventDefault();zoomOut()"
+            onclick="zoomOut();event.stopPropagation()">−</div>
         </div>
       </div>
     </div>
@@ -1222,9 +1226,9 @@ label {
       </div>
       <div class="ab-r2">
         <div class="qty-row">
-          <button class="qb" onclick="chQty(-1)">−</button>
+          <button class="qb" onclick="chQty(-1)" ontouchstart="event.stopPropagation()">−</button>
           <div class="qn" id="qty-disp">1</div>
-          <button class="qb" onclick="chQty(1)">+</button>
+          <button class="qb" onclick="chQty(1)" ontouchstart="event.stopPropagation()">+</button>
         </div>
         <label class="aalt"><input type="checkbox" id="ni-alc"> Alcohol</label>
         <button class="ab-btn" onclick="addItem()">
@@ -1851,8 +1855,10 @@ function onTouchStart(e,id){
 function onTouchMove(e){
   if(!touchDragId)return;
   const t=e.touches[0];
-  if(Math.abs(t.clientX-touchSX)>8||Math.abs(t.clientY-touchSY)>8)clearTimeout(tTimer);
-  if(!movedEnough)return;
+  const dx=Math.abs(t.clientX-touchSX), dy=Math.abs(t.clientY-touchSY);
+  if(dx>8||dy>8) clearTimeout(tTimer);
+  if(!movedEnough) return; // let browser handle scroll normally
+  // Only block scroll when actually dragging an item
   e.preventDefault();
   if(ghost){ghost.style.left=t.clientX+'px';ghost.style.top=t.clientY+'px';}
   document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('drag-over'));
@@ -1862,7 +1868,7 @@ function onTouchEnd(e){
   clearTimeout(tTimer);
   if(ghost){ghost.style.display='none';ghost=null;}
   document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('drag-over'));
-  if(!movedEnough||!touchDragId){touchDragId=null;return;}
+  if(!movedEnough||!touchDragId){touchDragId=null;movedEnough=false;return;}
   const t=e.changedTouches[0];
   const dz=document.elementFromPoint(t.clientX,t.clientY)?.closest('.drop-zone');
   if(dz)assignItemToPerson(touchDragId,parseInt(dz.dataset.pid));
@@ -2161,33 +2167,44 @@ function _screenToOriginal(clientX, clientY) {
     if (!overlay) return;
 
     let _lastTap = 0;
+    let _panStartedInOverlay = false;
 
     overlay.addEventListener('touchstart', e => {
+      // Don't intercept touches on zoom buttons
+      if (e.target.closest('.zoom-btn') || e.target.closest('.receipt-zoom-bar')) return;
+
       if (e.touches.length === 2) {
         e.preventDefault();
         _panActive = false;
-        _pinchStartDist  = Math.hypot(
+        _panStartedInOverlay = false;
+        _pinchStartDist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
         _pinchStartScale = _scale;
-        // Set origin to midpoint of two fingers
         const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         const my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         const { fx, fy } = _imgFraction(mx, my);
         _originX = fx; _originY = fy;
+
       } else if (e.touches.length === 1) {
         const now = Date.now();
-        if (now - _lastTap < 280) {
-          // Double-tap: reset zoom
+        const tgt = e.target;
+        // Double-tap ONLY on image background (not on buttons/markers/hints)
+        const isImgArea = tgt === overlay ||
+          tgt.tagName === 'IMG' ||
+          tgt.id === 'receipt-ref-img';
+        if (isImgArea && now - _lastTap < 280) {
           e.preventDefault();
           _resetZoom();
           _lastTap = 0;
           return;
         }
-        _lastTap = now;
+        if (isImgArea) _lastTap = now;
+
         if (_scale > 1) {
           _panActive = true;
+          _panStartedInOverlay = true;
           _panLastX = e.touches[0].clientX;
           _panLastY = e.touches[0].clientY;
         }
@@ -2203,7 +2220,7 @@ function _screenToOriginal(clientX, clientY) {
         );
         _scale = _pinchStartScale * (dist / _pinchStartDist);
         _applyTransform();
-      } else if (_panActive && e.touches.length === 1 && _scale > 1) {
+      } else if (_panActive && _panStartedInOverlay && e.touches.length === 1 && _scale > 1) {
         e.preventDefault();
         const dx = (e.touches[0].clientX - _panLastX) / _scale;
         const dy = (e.touches[0].clientY - _panLastY) / _scale;
@@ -2212,10 +2229,14 @@ function _screenToOriginal(clientX, clientY) {
         _panLastY = e.touches[0].clientY;
         _applyTransform();
       }
+      // All other touches (scroll) pass through naturally
     }, { passive: false });
 
     overlay.addEventListener('touchend', e => {
-      if (e.touches.length < 2) _panActive = false;
+      if (e.touches.length < 2) {
+        _panActive = false;
+        _panStartedInOverlay = false;
+      }
     });
   });
 })();
