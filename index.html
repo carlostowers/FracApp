@@ -975,50 +975,6 @@ label {
 }
 
 
-/* ─── 3-BUTTON PHOTO ROW ─── */
-.photo-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
-.pbtn-scan {
-  grid-column: 1 / -1; /* full width — primary action */
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  padding: 20px 16px;
-  background: rgba(201,168,76,.08);
-  border: 1px solid rgba(201,168,76,.30);
-  border-radius: var(--r);
-  cursor: pointer;
-  transition: all 200ms var(--ease-out);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 1px 0 rgba(201,168,76,.10) inset, 0 8px 32px rgba(0,0,0,.20);
-}
-.pbtn-scan:hover {
-  background: rgba(201,168,76,.13);
-  border-color: rgba(201,168,76,.50);
-  box-shadow: 0 0 0 1px rgba(201,168,76,.28), 0 8px 32px rgba(201,168,76,.12), 0 1px 0 rgba(201,168,76,.16) inset;
-}
-.pbtn-scan:active { transform: scale(.97); }
-.pbtn-scan .scan-icon-wrap {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: rgba(201,168,76,.14);
-  border: 1px solid rgba(201,168,76,.25);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.pbtn-scan .scan-text { text-align: left; }
-.pbtn-scan .scan-title { font-size: 14px; font-weight: 700; color: var(--gold-l); display: block; }
-.pbtn-scan .scan-sub   { font-size: 11px; color: var(--t3); display: block; margin-top: 2px; }
-.pbtn-sm {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 7px; padding: 16px 8px;
-  background: var(--g);
-  border: 1px solid var(--gb);
-  border-radius: var(--r-sm);
-  cursor: pointer;
-  transition: all 200ms var(--ease-out);
-}
-.pbtn-sm:hover { background: var(--gh); border-color: rgba(201,168,76,.28); }
-.pbtn-sm:active { transform: scale(.96); }
-.pbtn-sm svg { color: var(--t2); transition: color 150ms; }
-.pbtn-sm:hover svg { color: var(--gold); }
-.pbtn-sm span { font-size: 11px; font-weight: 600; color: var(--t3); }
 
 /* ─── RECEIPT OVERLAY (tap-to-add) ─── */
 .receipt-overlay-wrap {
@@ -1075,6 +1031,16 @@ label {
   animation: markerPop .25s var(--ease-spring) forwards;
 }
 @keyframes markerPop { from { transform: translate(-50%,-50%) scale(0); } to { transform: translate(-50%,-50%) scale(1); } }
+
+
+/* Tap highlight rect on receipt image */
+#tap-highlight {
+  position: absolute;
+  background: rgba(201,168,76,.20);
+  border: 1.5px solid rgba(201,168,76,.70);
+  border-radius: 3px;
+  pointer-events: none;
+}
 
 /* ─── TAP-TO-ADD POPUP ─── */
 .tap-popup {
@@ -1135,38 +1101,18 @@ label {
   </div>
 
   <div class="up-scroll">
-    <!-- iOS SCAN INSTRUCTIONS (shown briefly on first use) -->
-    <div id="scan-ios-tip" style="display:none;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:10px;font-size:12px;color:var(--t2);line-height:1.6;">
-      <div style="font-weight:700;color:var(--gold-l);margin-bottom:4px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;" id="scan-tip-title">📱 Cómo escanear en iPhone</div>
-      <div id="scan-tip-body">Cuando se abra la cámara, mantén presionado el botón de captura → selecciona <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS corregirá la perspectiva automáticamente.</div>
-    </div>
-
-    <div id="photo-btns">
-      <!-- SCAN — full width primary button -->
-      <div class="pbtn-scan" onclick="triggerScan()" style="margin-bottom:9px">
-        <div class="scan-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3H3v4"/><path d="M19 3h2v4"/><path d="M5 21H3v-4"/><path d="M19 21h2v-4"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
-        </div>
-        <div class="scan-text">
-          <span class="scan-title" id="scan-doc-lbl">Escanear recibo</span>
-          <span class="scan-sub" id="scan-doc-sub">Recomendado — mejor calidad</span>
-        </div>
+    <div class="photo-row" id="photo-btns">
+      <div class="pbtn" onclick="triggerCamera()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="cam-lbl">Cámara</span>
       </div>
-      <!-- CAMERA + GALLERY — perfectly equal -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
-        <div class="pbtn-sm" onclick="triggerCamera()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span id="cam-lbl">Cámara</span>
-        </div>
-        <div class="pbtn-sm" onclick="triggerGallery()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-          <span id="gal-lbl">Galería</span>
-        </div>
+      <div class="pbtn" onclick="triggerGallery()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        <span id="gal-lbl">Galería</span>
       </div>
     </div>
-    <input type="file" id="inp-scan" accept="image/*,application/pdf" style="display:none" onchange="onFile(this)">
-    <input type="file" id="inp-cam"  accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
-    <input type="file" id="inp-gal"  accept="image/*,image/heic,image/heif,.heic,.heif" style="display:none" onchange="onFile(this)">
+    <input type="file" id="inp-cam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
+    <input type="file" id="inp-gal" accept="image/*,image/heic,image/heif,.heic,.heif" style="display:none" onchange="onFile(this)">
 
     <div class="prev-w" id="prev-w">
       <img id="prev-img" src="" alt="Recibo">
@@ -1447,11 +1393,8 @@ const T = {
     s1:'Preparando OCR', s2:'Reconociendo texto', s3:'Analizando líneas',
     drag:'Arrastra artículos sobre un participante →',
     receiptRef:'Ver recibo',
-    scanDoc:'Escanear recibo',
-    scanTipTitle:'📱 Cómo escanear en iPhone',
     scanTipBody:'Cuando se abra la cámara, mantén presionado el botón de captura → selecciona <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS corregirá la perspectiva automáticamente.',
     tapHintTxt:'Toca el recibo para leer artículos',
-    scanDocSub:'Imagen limpia y precisa',
     tapHint:'Toca el recibo para añadir un artículo',
     tapTitle:'Añadir artículo',
     unassign:'Sin asignar — arrastra o toca', assigned:'Artículos asignados',
@@ -1499,8 +1442,6 @@ const T = {
     s1:'Preparing OCR', s2:'Recognizing text', s3:'Analyzing lines',
     drag:'Drag items onto a participant →',
     receiptRef:'View receipt',
-    scanDoc:'Scan receipt',
-    scanTipTitle:'📱 How to scan on iPhone',
     scanTipBody:'When camera opens, press and hold the capture button → select <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS will auto-correct perspective.',
     tapHintTxt:'Tap receipt to read items',
     scanDocSub:'Clean, precise image',
@@ -1566,9 +1507,6 @@ function applyLang() {
     's1-txt': L.s1, 's2-txt': L.s2, 's3-txt': L.s3,
     'drag-lbl': L.drag,
     'receipt-ref-lbl': L.receiptRef,
-    'scan-doc-lbl':    L.scanDoc,
-    'scan-tip-title':  L.scanTipTitle,
-    'scan-doc-sub':    L.scanDocSub,
     'receipt-tap-hint':L.tapHint,
     'tap-popup-title': L.tapTitle,
     'tap-alc-lbl':     L.alcohol,
@@ -2084,67 +2022,99 @@ function escA(s){return(s||'').replace(/"/g,'&quot;');}
 
 function backToUpload(){if(items.length>0){if(!confirm(L.backConfirm))return;}items=[];persons=[];showV('v-upload');}
 
-// ── DOCUMENT SCANNER ──
-function triggerScan() {
-  // Always show iOS tip for 8 seconds every time scan is tapped
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const tip = document.getElementById('scan-ios-tip');
-  if (tip) {
-    // Clear any previous timer
-    if (window._scanTipTimer) clearTimeout(window._scanTipTimer);
-    tip.style.display = isIOS ? 'block' : 'none';
-    if (isIOS) {
-      window._scanTipTimer = setTimeout(() => { tip.style.display = 'none'; }, 8000);
-    }
-  }
-  // Small delay so tip is visible before camera opens
-  setTimeout(() => {
-    document.getElementById('inp-scan').value = '';
-    document.getElementById('inp-scan').click();
-  }, isIOS ? 600 : 0);
-}
+
+
 
 
 // ── RECEIPT IMAGE ZOOM ──
-let _zoomScale = 1, _zoomX = 0, _zoomY = 0;
+// State
+let _scale = 1, _originX = 0.5, _originY = 0.5; // origin as fraction of image size
+let _translateX = 0, _translateY = 0;
 let _pinchStartDist = 0, _pinchStartScale = 1;
-let _panStartX = 0, _panStartY = 0, _panTouchX = 0, _panTouchY = 0;
-let _isPanning = false;
+let _panActive = false, _panLastX = 0, _panLastY = 0;
 
-function _applyZoom() {
-  const img = document.getElementById('receipt-ref-img');
-  if (!img) return;
-  _zoomScale = Math.max(1, Math.min(5, _zoomScale));
-  if (_zoomScale === 1) { _zoomX = 0; _zoomY = 0; }
-  img.style.transform = `scale(${_zoomScale}) translate(${_zoomX}px, ${_zoomY}px)`;
+function _getImg() { return document.getElementById('receipt-ref-img'); }
+
+function _applyTransform() {
+  const img = _getImg(); if (!img) return;
+  _scale = Math.max(1, Math.min(5, _scale));
+  if (_scale === 1) { _translateX = 0; _translateY = 0; _originX = 0.5; _originY = 0.5; }
+  img.style.transformOrigin = `${_originX * 100}% ${_originY * 100}%`;
+  img.style.transform = `scale(${_scale}) translate(${_translateX}px, ${_translateY}px)`;
 }
 
-function zoomIn()  { _zoomScale = Math.min(5, _zoomScale + 0.5); _applyZoom(); }
-function zoomOut() { _zoomScale = Math.max(1, _zoomScale - 0.5); _applyZoom(); }
+function _resetZoom() {
+  _scale = 1; _translateX = 0; _translateY = 0; _originX = 0.5; _originY = 0.5;
+  _applyTransform();
+}
 
-function _resetZoom() { _zoomScale = 1; _zoomX = 0; _zoomY = 0; _applyZoom(); }
+// Button zoom — center on current view
+function zoomIn()  {
+  _scale = Math.min(5, _scale + 0.75);
+  _applyTransform();
+}
+function zoomOut() {
+  _scale = Math.max(1, _scale - 0.75);
+  _applyTransform();
+}
 
-// Pinch to zoom + pan — on the overlay div
-(function setupZoom() {
+// Get position relative to image natural dimensions
+function _imgFraction(clientX, clientY) {
+  const img = _getImg(); if (!img) return { fx: 0.5, fy: 0.5 };
+  const r = img.getBoundingClientRect();
+  return {
+    fx: Math.max(0, Math.min(1, (clientX - r.left)  / r.width)),
+    fy: Math.max(0, Math.min(1, (clientY - r.top)   / r.height))
+  };
+}
+
+// Convert screen tap → original image coordinates (accounting for zoom)
+function _screenToOriginal(clientX, clientY) {
+  const img = _getImg(); if (!img) return { ox: 0, oy: 0 };
+  const { fx, fy } = _imgFraction(clientX, clientY);
+  // Reverse the transform
+  const ox = (fx / _scale + _originX * (1 - 1 / _scale) - _translateX / (_scale * img.naturalWidth / img.clientWidth)) * img.naturalWidth;
+  const oy = (fy / _scale + _originY * (1 - 1 / _scale) - _translateY / (_scale * img.naturalHeight / img.clientHeight)) * img.naturalHeight;
+  return { ox, oy };
+}
+
+// Pinch + pan touch handler
+(function _setupZoomTouch() {
   document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('receipt-overlay');
     if (!overlay) return;
 
+    let _lastTap = 0;
+
     overlay.addEventListener('touchstart', e => {
       if (e.touches.length === 2) {
         e.preventDefault();
+        _panActive = false;
         _pinchStartDist  = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        _pinchStartScale = _zoomScale;
-        _isPanning = false;
-      } else if (e.touches.length === 1 && _zoomScale > 1) {
-        _isPanning    = true;
-        _panTouchX    = e.touches[0].clientX;
-        _panTouchY    = e.touches[0].clientY;
-        _panStartX    = _zoomX;
-        _panStartY    = _zoomY;
+        _pinchStartScale = _scale;
+        // Set origin to midpoint of two fingers
+        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const { fx, fy } = _imgFraction(mx, my);
+        _originX = fx; _originY = fy;
+      } else if (e.touches.length === 1) {
+        const now = Date.now();
+        if (now - _lastTap < 280) {
+          // Double-tap: reset zoom
+          e.preventDefault();
+          _resetZoom();
+          _lastTap = 0;
+          return;
+        }
+        _lastTap = now;
+        if (_scale > 1) {
+          _panActive = true;
+          _panLastX = e.touches[0].clientX;
+          _panLastY = e.touches[0].clientY;
+        }
       }
     }, { passive: false });
 
@@ -2155,30 +2125,21 @@ function _resetZoom() { _zoomScale = 1; _zoomX = 0; _zoomY = 0; _applyZoom(); }
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        _zoomScale = _pinchStartScale * (dist / _pinchStartDist);
-        _applyZoom();
-      } else if (_isPanning && e.touches.length === 1 && _zoomScale > 1) {
+        _scale = _pinchStartScale * (dist / _pinchStartDist);
+        _applyTransform();
+      } else if (_panActive && e.touches.length === 1 && _scale > 1) {
         e.preventDefault();
-        const dx = (e.touches[0].clientX - _panTouchX) / _zoomScale;
-        const dy = (e.touches[0].clientY - _panTouchY) / _zoomScale;
-        _zoomX = _panStartX + dx;
-        _zoomY = _panStartY + dy;
-        _applyZoom();
+        const dx = (e.touches[0].clientX - _panLastX) / _scale;
+        const dy = (e.touches[0].clientY - _panLastY) / _scale;
+        _translateX += dx; _translateY += dy;
+        _panLastX = e.touches[0].clientX;
+        _panLastY = e.touches[0].clientY;
+        _applyTransform();
       }
     }, { passive: false });
 
     overlay.addEventListener('touchend', e => {
-      _isPanning = false;
-      // Double-tap to reset zoom
-      if (e.touches.length === 0 && e.changedTouches.length === 1) {
-        const now = Date.now();
-        if (now - (overlay._lastTap || 0) < 300) {
-          _resetZoom();
-          overlay._lastTap = 0;
-        } else {
-          overlay._lastTap = now;
-        }
-      }
+      if (e.touches.length < 2) _panActive = false;
     });
   });
 })();
@@ -2187,104 +2148,130 @@ function _resetZoom() { _zoomScale = 1; _zoomX = 0; _zoomY = 0; _applyZoom(); }
 let tapMarkers = []; // track placed markers
 
 function onReceiptTap(e) {
-  const wrap = document.getElementById('receipt-overlay');
-  if (!wrap) return;
-  const img  = document.getElementById('receipt-ref-img');
-  if (!img)  return;
-  const rect = wrap.getBoundingClientRect();
-  const imgRect = img.getBoundingClientRect();
+  // Skip if this was part of a pan gesture
+  if (_panActive) return;
+  const overlay = document.getElementById('receipt-overlay');
+  const img     = document.getElementById('receipt-ref-img');
+  if (!overlay || !img) return;
 
   const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
   const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-  const x = clientX - rect.left;
-  const y = clientY - rect.top;
+
+  // Convert screen tap to original image coordinates (zoom-aware)
+  const { ox, oy } = _screenToOriginal(clientX, clientY);
 
   // Hide hint
   const hint = document.getElementById('receipt-tap-hint');
   if (hint) hint.style.display = 'none';
 
-  // Find nearest OCR words in tapped region
-  // Map tap position to original image coordinates
-  const scaleX = img.naturalWidth  / imgRect.width;
-  const scaleY = img.naturalHeight / imgRect.height;
-  const imgOffX = imgRect.left - rect.left;
-  const imgOffY = imgRect.top  - rect.top;
-  const origX = (x - imgOffX) * scaleX;
-  const origY = (y - imgOffY) * scaleY;
-
-  // Find words within ~100px radius in original image coords
+  // ── Find words on the tapped line ──
   const words = window._ocrWords || [];
-  const RADIUS_Y = img.naturalHeight * 0.04; // ~4% height = one line zone
-  const RADIUS_X = img.naturalWidth  * 0.8;  // wide X range = full line width
+  const H = img.naturalHeight || 1000;
+  const W = img.naturalWidth  || 500;
+  const ZONE_Y = H * 0.035; // ~3.5% height = one line band
 
-  // Collect words on the same horizontal line as tap
-  const lineWords = words.filter(w => {
-    const wCy = (w.bbox.y0 + w.bbox.y1) / 2;
-    return Math.abs(wCy - origY) < RADIUS_Y;
-  }).sort((a,b) => a.bbox.x0 - b.bbox.x0);
+  const lineWords = words
+    .filter(w => {
+      const cy = (w.bbox.y0 + w.bbox.y1) / 2;
+      return Math.abs(cy - oy) < ZONE_Y;
+    })
+    .sort((a, b) => a.bbox.x0 - b.bbox.x0);
 
-  // Also get words in 3-line zone above tap for price detection
-  const nearWords = words.filter(w => {
-    const wCy = (w.bbox.y0 + w.bbox.y1) / 2;
-    return Math.abs(wCy - origY) < RADIUS_Y * 3;
-  });
-
-  // Try to extract item name (non-numeric words on same line)
   const nameParts = lineWords
-    .filter(w => !/^[\$\d\.,]+$/.test(w.text))
+    .filter(w => !/^[\$\d\.,]+$/.test(w.text) && w.text.length > 1)
     .map(w => w.text).join(' ').trim();
 
-  // Try to extract price (last number on the line or nearby)
   const priceMatch = lineWords
-    .map(w => w.text)
-    .join(' ')
+    .map(w => w.text).join(' ')
     .match(/\$?\s*(\d{1,3}[.,]\d{2})\s*$/);
-  const detectedPrice = priceMatch ? parseFloat(priceMatch[1].replace(',','.')) : 0;
+  const detectedPrice = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
 
-  // Place marker
+  // ── Draw highlight rect over detected line ──
+  _clearHighlight();
+  if (lineWords.length > 0) {
+    const x0 = Math.min(...lineWords.map(w => w.bbox.x0));
+    const y0 = Math.min(...lineWords.map(w => w.bbox.y0));
+    const x1 = Math.max(...lineWords.map(w => w.bbox.x1));
+    const y1 = Math.max(...lineWords.map(w => w.bbox.y1));
+    _drawHighlight(x0, y0, x1, y1, W, H);
+  }
+
+  // ── Marker dot at tap ──
   const oldM = document.getElementById('tap-marker-pending');
   if (oldM) oldM.remove();
-  const marker = document.createElement('div');
-  marker.className = 'receipt-tap-marker';
-  marker.style.left = x + 'px';
-  marker.style.top  = y + 'px';
+  const imgRect = img.getBoundingClientRect();
+  const markerX = clientX - overlay.getBoundingClientRect().left;
+  const markerY = clientY - overlay.getBoundingClientRect().top;
+  const marker  = document.createElement('div');
+  marker.className  = 'receipt-tap-marker';
+  marker.style.left = markerX + 'px';
+  marker.style.top  = markerY + 'px';
   marker.id = 'tap-marker-pending';
-  wrap.appendChild(marker);
+  overlay.appendChild(marker);
 
-  // Pre-fill popup with detected text
-  showTapPopup(clientX, clientY, nameParts, detectedPrice);
+  // ── Show popup BELOW the receipt panel, never over the image ──
+  showTapPopup(nameParts, detectedPrice);
 }
 
-function showTapPopup(cx, cy, prefillName='', prefillPrice=0) {
-  const popup = document.getElementById('tap-popup');
-  if (!popup) return;
+function _clearHighlight() {
+  document.getElementById('tap-highlight')?.remove();
+}
+
+function _drawHighlight(x0, y0, x1, y1, natW, natH) {
+  const img = document.getElementById('receipt-ref-img');
+  if (!img) return;
+  const r = img.getBoundingClientRect();
+  const overlay = document.getElementById('receipt-overlay');
+  const oR = overlay.getBoundingClientRect();
+  // Scale from natural to displayed size
+  const scX = r.width  / natW;
+  const scY = r.height / natH;
+  const hl = document.createElement('div');
+  hl.id = 'tap-highlight';
+  hl.style.cssText = `
+    position:absolute;
+    left:${(r.left - oR.left) + x0 * scX}px;
+    top:${(r.top  - oR.top)  + y0 * scY}px;
+    width:${(x1 - x0) * scX}px;
+    height:${(y1 - y0) * scY}px;
+    background:rgba(201,168,76,.22);
+    border:1.5px solid rgba(201,168,76,.7);
+    border-radius:3px;
+    pointer-events:none;
+    animation:markerPop .2s var(--ease-spring) forwards;
+  `;
+  overlay.appendChild(hl);
+}
+
+
+function showTapPopup(prefillName='', prefillPrice=0) {
+  const popup  = document.getElementById('tap-popup');
+  const panel  = document.getElementById('receipt-ref');
+  if (!popup || !panel) return;
   popup.classList.add('show');
-  document.getElementById('tap-name').value  = prefillName;
-  document.getElementById('tap-price').value = prefillPrice > 0 ? prefillPrice.toFixed(2) : '';
-  document.getElementById('tap-alc').checked = prefillName ? isAlcN(prefillName) : false;
+  document.getElementById('tap-name').value   = prefillName;
+  document.getElementById('tap-price').value  = prefillPrice > 0 ? prefillPrice.toFixed(2) : '';
+  document.getElementById('tap-alc').checked  = prefillName ? isAlcN(prefillName) : false;
 
-  // Position popup: prefer below tap, flip if near bottom
-  const pw = Math.min(280, window.innerWidth * 0.9);
-  const ph = 160;
-  let left = cx - pw / 2;
-  let top  = cy + 18;
-  // clamp horizontal
-  left = Math.max(10, Math.min(left, window.innerWidth - pw - 10));
-  // flip above if not enough room below
-  if (top + ph > window.innerHeight - 20) top = cy - ph - 18;
-  top = Math.max(10, top);
-  popup.style.left  = left + 'px';
-  popup.style.top   = top  + 'px';
-  popup.style.width = pw   + 'px';
+  // Position: always below the receipt panel
+  const panelRect = panel.getBoundingClientRect();
+  const pw = Math.min(300, window.innerWidth - 24);
+  popup.style.width  = pw + 'px';
+  popup.style.left   = Math.round((window.innerWidth - pw) / 2) + 'px';
 
-  // Focus name input
+  // Place below panel, but if not enough room, place at 40% of viewport height
+  let top = panelRect.bottom + 8;
+  if (top + 180 > window.innerHeight) top = Math.round(window.innerHeight * 0.40);
+  popup.style.top  = top + 'px';
+
   setTimeout(() => document.getElementById('tap-name')?.focus(), 80);
 }
 
+
 function closeTapPopup() {
   document.getElementById('tap-popup')?.classList.remove('show');
-  const m = document.getElementById('tap-marker-pending');
-  if (m) m.remove();
+  document.getElementById('tap-marker-pending')?.remove();
+  _clearHighlight();
 }
 
 function confirmTapItem() {
@@ -2305,6 +2292,7 @@ function confirmTapItem() {
     tapMarkers.push(m);
   }
   document.getElementById('tap-popup')?.classList.remove('show');
+  _clearHighlight();
   renderItems(); updProgress();
 }
 
