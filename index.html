@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080706">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Frac">
+<meta name="description" content="Divide cuentas de restaurante al instante · Split restaurant bills instantly">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-512.svg">
 <title>Frac — Divide con precisión</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -908,6 +915,60 @@ label {
   box-shadow: 0 8px 40px rgba(0,0,0,.6), 0 0 20px rgba(201,168,76,.22);
   display: none;
 }
+
+/* ─── TAX CONFIG PANEL ─── */
+.tax-panel {
+  padding: 15px; margin-bottom: 11px;
+}
+.tax-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 13px;
+}
+.tax-panel-title {
+  font-size: 10px; font-weight: 700; color: var(--t3);
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.tax-reset-btn {
+  font-size: 10px; font-weight: 600; color: var(--gold);
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font); letter-spacing: .04em;
+  padding: 3px 0; opacity: .75; transition: opacity 150ms;
+}
+.tax-reset-btn:hover { opacity: 1; }
+.tax-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.tax-row:last-child { margin-bottom: 0; }
+.tax-label {
+  font-size: 12px; font-weight: 600; color: var(--t2);
+  flex: 1; margin: 0;
+  text-transform: none; letter-spacing: 0;
+}
+.tax-input-wrap {
+  display: flex; align-items: center; gap: 4px;
+}
+.tax-input-wrap input {
+  width: 72px; padding: 8px 10px;
+  font-size: 14px; font-family: var(--mono);
+  font-feature-settings: "tnum"; text-align: right;
+}
+.tax-pct-symbol {
+  font-size: 13px; font-weight: 700; color: var(--gold);
+  font-family: var(--mono);
+}
+.tax-note {
+  font-size: 10px; color: var(--t3); margin-top: 10px;
+  line-height: 1.5; letter-spacing: .01em;
+}
+.pr-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--gold-dim); border: 1px solid var(--gold-bdr);
+  border-radius: 99px; padding: 2px 8px;
+  font-size: 9px; font-weight: 700; color: var(--gold-l);
+  letter-spacing: .05em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -932,18 +993,24 @@ label {
     </div>
     <div class="logo-word">Fr<em>a</em>c</div>
     <div class="logo-divider"></div>
-    <div class="logo-tag">Divide con precisión</div>
+    <div class="logo-tag" id="logo-tag">Divide con precisión</div>
+    <div style="margin-top:14px">
+      <button id="lang-toggle" onclick="setLang(lang==='es'?'en':'es')"
+        style="background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.22);border-radius:99px;
+               color:var(--gold-l);font-size:11px;font-weight:700;letter-spacing:.08em;
+               padding:5px 14px;cursor:pointer;font-family:var(--font);transition:all 180ms">EN</button>
+    </div>
   </div>
 
   <div class="up-scroll">
     <div class="photo-row" id="photo-btns">
       <div class="pbtn" onclick="triggerCamera()">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span>Cámara</span>
+        <span id="cam-btn-lbl">Cámara</span>
       </div>
       <div class="pbtn" onclick="triggerGallery()">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-        <span>Galería</span>
+        <span id="gal-btn-lbl">Galería</span>
       </div>
     </div>
     <input type="file" id="inp-cam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
@@ -958,7 +1025,7 @@ label {
     </div>
 
     <div class="glass sc-card">
-      <h3>Participantes</h3>
+      <h3 id="sc-card-title">Participantes</h3>
       <div class="pc-row">
         <button class="pc-b" onclick="changeCount(-1)">−</button>
         <div class="pc-n" id="cnt">2</div>
@@ -968,12 +1035,12 @@ label {
     </div>
 
     <div class="r2">
-      <div><label>Restaurante</label><input type="text" id="rest-in" placeholder="Nombre..."></div>
-      <div><label>Fecha</label><input type="date" id="date-in"></div>
+      <div><label id="rest-label">Restaurante</label><input type="text" id="rest-in" placeholder="Nombre..."></div>
+      <div><label id="date-label">Fecha</label><input type="date" id="date-in"></div>
     </div>
     <div class="bot-btns">
       <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo</button>
-      <button class="btn bgl" onclick="manualMode()" style="font-size:14px;padding:12px">Ingresar manualmente</button>
+      <button class="btn bgl" id="manual-btn" onclick="manualMode()" style="font-size:14px;padding:12px"><span id="manual-btn-lbl">Ingresar manualmente</span></button>
     </div>
   </div>
 </div>
@@ -987,12 +1054,12 @@ label {
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
     </div>
   </div>
-  <h2>Analizando recibo</h2>
+  <h2 id="scan-h2">Analizando recibo</h2>
   <p id="scan-provider-label">Iniciando reconocimiento de texto…</p>
   <div class="ss glass-sm">
-    <div class="st on" id="s1"><div class="sd"></div>Preparando OCR</div>
-    <div class="st"    id="s2"><div class="sd"></div>Reconociendo texto</div>
-    <div class="st"    id="s3"><div class="sd"></div>Analizando líneas</div>
+    <div class="st on" id="s1"><div class="sd"></div><span id="step-s1">Preparando OCR</span></div>
+    <div class="st"    id="s2"><div class="sd"></div><span id="step-s2">Reconociendo texto</span></div>
+    <div class="st"    id="s3"><div class="sd"></div><span id="step-s3">Analizando líneas</span></div>
   </div>
 </div>
 
@@ -1001,7 +1068,7 @@ label {
   <div class="view-topbar">
     <button class="back-btn" onclick="backToUpload()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-      Inicio
+      <span id="back-start-btn">Inicio</span>
     </button>
   </div>
   <div class="sp-hdr">
@@ -1020,12 +1087,12 @@ label {
   </div>
 
   <div style="padding:7px 16px 3px;font-size:9px;font-weight:700;color:var(--t4);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;background:rgba(8,7,6,.70);">
-    Arrastra artículos sobre un participante →
+    <span id="drag-hint-lbl">Arrastra artículos sobre un participante →</span>
   </div>
   <div class="drop-row" id="drop-row"></div>
 
   <div class="scroll">
-    <div class="sl">Sin asignar — arrastra o toca</div>
+    <div class="sl" id="unassigned-lbl">Sin asignar — arrastra o toca</div>
     <div id="unassigned"></div>
 
     <div class="add-bar">
@@ -1039,7 +1106,7 @@ label {
           <div class="qn" id="qty-disp">1</div>
           <button class="qb" onclick="chQty(1)">+</button>
         </div>
-        <label class="aalt"><input type="checkbox" id="ni-alc"> Alcohol</label>
+        <label class="aalt"><input type="checkbox" id="ni-alc">${S.alcohol}</label>
         <button class="ab-btn" onclick="addItem()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
@@ -1047,7 +1114,7 @@ label {
     </div>
 
     <div id="assigned-sec" style="display:none;margin-top:4px">
-      <div class="sl">Artículos asignados</div>
+      <div class="sl" id="assigned-lbl">Artículos asignados</div>
       <div id="assigned"></div>
     </div>
   </div>
@@ -1062,7 +1129,7 @@ label {
   <div class="view-topbar">
     <button class="back-btn" onclick="backToSplit()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-      Ajustar
+      <span id="back-adjust-btn">Ajustar</span>
     </button>
   </div>
   <div class="rh">
@@ -1074,16 +1141,45 @@ label {
     <div class="r-sub" id="r-date"></div>
   </div>
   <div class="scroll">
+    <!-- TAX CONFIGURATION CARD -->
+    <div class="glass tax-panel" id="tax-config-card">
+      <div class="tax-panel-header">
+        <div class="tax-panel-title" id="tax-panel-title">Impuestos</div>
+        <button class="tax-reset-btn" onclick="resetTaxPR()" id="tax-reset-btn" style="display:none">PR Default</button>
+      </div>
+      <div id="pr-badge-wrap" class="pr-badge">
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="var(--gold)"><circle cx="4" cy="4" r="4"/></svg>
+        <span id="tax-location-badge">Puerto Rico</span>
+      </div>
+      <div class="tax-row">
+        <label class="tax-label" id="tax-food-label">Tax comida</label>
+        <div class="tax-input-wrap">
+          <input type="number" id="tax-food-input" value="7" min="0" max="50" step="0.1"
+            oninput="updateTax('food', this.value)" style="font-size:14px">
+          <span class="tax-pct-symbol">%</span>
+        </div>
+      </div>
+      <div class="tax-row">
+        <label class="tax-label" id="tax-alc-label">Tax alcohol</label>
+        <div class="tax-input-wrap">
+          <input type="number" id="tax-alc-input" value="11.5" min="0" max="50" step="0.1"
+            oninput="updateTax('alc', this.value)" style="font-size:14px">
+          <span class="tax-pct-symbol">%</span>
+        </div>
+      </div>
+      <div class="tax-note" id="tax-note">Tasas configuradas para Puerto Rico. Cámbialas si estás en otro país.</div>
+    </div>
+
     <div class="glass tip-c">
-      <div class="tip-c-label">Propina</div>
+      <div class="tip-c-label" id="tip-card-label">Propina</div>
       <div class="tip-seg">
-        <div class="tp" onclick="setTip(15)">15%<span>Estándar</span></div>
-        <div class="tp" onclick="setTip(18)">18%<span>Bueno</span></div>
-        <div class="tp" onclick="setTip(20)">20%<span>Excelente</span></div>
-        <div class="tp" onclick="setTip(25)">25%<span>Wow</span></div>
+        <div class="tp" onclick="setTip(15)">15%<span id="tip-std">Estándar</span></div>
+        <div class="tp" onclick="setTip(18)">18%<span id="tip-good">Bueno</span></div>
+        <div class="tp" onclick="setTip(20)">20%<span id="tip-great">Excelente</span></div>
+        <div class="tp" onclick="setTip(25)">25%<span id="tip-wow">Wow</span></div>
       </div>
       <div class="tcust">
-        <label>$ Fijo</label>
+        <label id="tip-fixed-label">$ Fijo</label>
         <input type="number" id="tip-fix" placeholder="0.00" step="0.01" oninput="setTipFix(this.value)">
       </div>
     </div>
@@ -1099,8 +1195,8 @@ label {
 <!-- ════════════════ HISTORY ════════════════ -->
 <div class="view" id="v-hist">
   <div style="padding:20px 16px 12px;flex-shrink:0;border-bottom:1px solid rgba(201,168,76,.10)">
-    <div style="font-size:19px;font-weight:800;letter-spacing:-0.03em">Historial</div>
-    <div style="font-size:12px;color:var(--t2);margin-top:3px">Todas tus visitas guardadas</div>
+    <div style="font-size:19px;font-weight:800;letter-spacing:-0.03em" id="hist-title">Historial</div>
+    <div style="font-size:12px;color:var(--t2);margin-top:3px" id="hist-sub">Todas tus visitas guardadas</div>
   </div>
   <div class="scroll"><div id="hist-list"></div></div>
   <div style="padding:9px 16px max(14px,env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid rgba(201,168,76,.10)">
@@ -1114,7 +1210,7 @@ label {
   <div class="mh"></div>
   <div class="mn" id="m-name"></div>
   <div class="mp" id="m-price"></div>
-  <div class="mq">¿Quién pidió este artículo? Puedes seleccionar varios.</div>
+  <div class="mq" id="modal-q">¿Quién pidió este artículo? Puedes seleccionar varios.</div>
   <div class="mpers" id="m-pers"></div>
   <div class="ma">
     <button class="btn bgl" onclick="closeModal()">Cancelar</button>
@@ -1145,6 +1241,269 @@ label {
 
 
 <script>
+// ═══════════════════════════════════════════════
+//  SERVICE WORKER REGISTRATION
+// ═══════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  BILINGUAL SYSTEM — ES / EN
+//  Auto-detects browser language, user can switch
+// ═══════════════════════════════════════════════
+const STRINGS = {
+  es: {
+    tagline:       'Divide con precisión',
+    camBtn:        'Cámara',
+    galBtn:        'Galería',
+    participants:  'Participantes',
+    restaurant:    'Restaurante',
+    date:          'Fecha',
+    scanBtn:       'Leer recibo',
+    manualBtn:     'Ingresar manualmente',
+    scanTitle:     'Analizando recibo',
+    scanSub:       'Iniciando reconocimiento de texto…',
+    step1:         'Preparando OCR',
+    step2:         'Reconociendo texto',
+    step3:         'Analizando líneas',
+    dragHint:      'Arrastra artículos sobre un participante →',
+    unassignedLbl: 'Sin asignar — arrastra o toca',
+    assignedLbl:   'Artículos asignados',
+    alcohol:       'Alcohol',
+    seeResult:     'Ver resultado →',
+    backStart:     'Inicio',
+    backAdjust:    'Ajustar',
+    totalLabel:    'Total de la cuenta',
+    tipLabel:      'Propina',
+    tipFixed:      '$ Fijo',
+    save:          'Guardar',
+    exportCSV:     'Exportar CSV',
+    exportFull:    'Exportar CSV para Excel',
+    histTitle:     'Historial',
+    histSub:       'Todas tus visitas guardadas',
+    modalQ:        '¿Quién pidió este artículo? Puedes seleccionar varios.',
+    cancel:        'Cancelar',
+    confirm:       'Confirmar',
+    changePic:     'Cambiar foto',
+    picReady:      '✓ Lista',
+    processing:    'Procesando imagen...',
+    noItems:       'No se detectaron artículos.\nVerifica que la foto sea clara e iluminada, o ingresa manualmente.',
+    ocrErr:        'Error al leer el recibo.\nPuedes ingresar los artículos manualmente.',
+    imgErr:        'Este formato de imagen no es compatible con tu navegador.\nUsa JPG, PNG o WebP.',
+    imgConvErr:    'Error al convertir la imagen. Intenta con otra foto.',
+    imgFmtErr:     'No se pudo leer esta imagen.\n\nFormatos compatibles: JPG, PNG, WebP, HEIC (iOS), BMP.\n\nSi es HEIC, asegúrate de abrir el app en Safari (iOS) o Chrome (Android).',
+    imgBadErr:     'La imagen no se procesó correctamente. Vuelve a seleccionarla.',
+    backConfirm:   S.backConfirm,
+    noHistory:     'Guarda al menos una cuenta primero',
+    allAssigned:   'Todos los artículos asignados',
+    assigned:      'asignados',
+    food7:         ()=>`Comida · ${taxFood}%`,
+    alc11:         ()=>`Alcohol · ${taxAlc}%`,
+    taxFood:       S.taxFood,
+    taxAlc:        S.taxAlc,
+    tip:           'Propina',
+    totalPay:      S.totalPay,
+    noVisits:      '${S.noVisits}',
+    noVisitsSub:   '${S.noVisitsSub}',
+    tipStd:        'Estándar',
+    tipGood:       'Bueno',
+    tipGreat:      'Excelente',
+    tipWow:        'Wow',
+    artItem:       'Artículo',
+    personN:       (n) => `Persona ${n}`,
+    artN:          (n) => `${n} art.`,
+    ofN:           (d,t) => `${d} de ${t} asignados`,
+    nameHolder:    'Nombre del artículo...',
+    eliminate:     'Eliminar',
+    nameField:     'Nombre',
+    priceField:    'Precio',
+    restHolder:    'Nombre...',
+    total:         'Total',
+    nueva:         'Nueva',
+    histNav:       'Historial',
+    exportNav:     'Exportar',
+    taxPanel:      'Impuestos',
+    taxReset:      'PR Default',
+    taxFoodLbl:    'Tax comida',
+    taxAlcLbl:     'Tax alcohol',
+    taxNote:       'Tasas configuradas para Puerto Rico. Cámbialas si estás en otro país.',
+    taxNoteCustom: 'Tasas personalizadas activas.',
+    noTax:         'Sin impuesto',
+  },
+  en: {
+    tagline:       'Split with precision',
+    camBtn:        'Camera',
+    galBtn:        'Gallery',
+    participants:  'Participants',
+    restaurant:    'Restaurant',
+    date:          'Date',
+    scanBtn:       'Read receipt',
+    manualBtn:     'Enter manually',
+    scanTitle:     'Reading receipt',
+    scanSub:       'Starting text recognition…',
+    step1:         'Preparing OCR',
+    step2:         'Recognizing text',
+    step3:         'Analyzing lines',
+    dragHint:      'Drag items onto a participant →',
+    unassignedLbl: 'Unassigned — drag or tap',
+    assignedLbl:   'Assigned items',
+    alcohol:       'Alcohol',
+    seeResult:     'See result →',
+    backStart:     'Start',
+    backAdjust:    'Adjust',
+    totalLabel:    'Total bill',
+    tipLabel:      'Tip',
+    tipFixed:      '$ Fixed',
+    save:          'Save',
+    exportCSV:     'Export CSV',
+    exportFull:    'Export CSV for Excel',
+    histTitle:     'History',
+    histSub:       'All your saved visits',
+    modalQ:        'Who ordered this item? You can select multiple.',
+    cancel:        'Cancel',
+    confirm:       'Confirm',
+    changePic:     'Change photo',
+    picReady:      '✓ Ready',
+    processing:    'Processing image...',
+    noItems:       'No items detected.\nMake sure the photo is clear and well-lit, or enter manually.',
+    ocrErr:        'Error reading receipt.\nYou can enter items manually.',
+    imgErr:        'This image format is not supported.\nUse JPG, PNG or WebP.',
+    imgConvErr:    'Error converting image. Try another photo.',
+    imgFmtErr:     'Could not read this image.\n\nSupported formats: JPG, PNG, WebP, HEIC (iOS), BMP.\n\nFor HEIC, open in Safari (iOS) or Chrome (Android).',
+    imgBadErr:     'Image was not processed correctly. Please reselect it.',
+    backConfirm:   'Go back to start? Current items will be lost.',
+    noHistory:     'Save at least one bill first',
+    allAssigned:   'All items assigned',
+    assigned:      'assigned',
+    food7:         ()=>`Food · ${taxFood}%`,
+    alc11:         ()=>`Alcohol · ${taxAlc}%`,
+    taxFood:       'Food tax (7%)',
+    taxAlc:        'Alcohol tax (11.5%)',
+    tip:           'Tip',
+    totalPay:      'Total to pay',
+    noVisits:      'No visits yet',
+    noVisitsSub:   'Complete a bill and save it',
+    tipStd:        'Standard',
+    tipGood:       'Good',
+    tipGreat:      'Excellent',
+    tipWow:        'Wow',
+    artItem:       'Item',
+    personN:       (n) => `Person ${n}`,
+    artN:          (n) => `${n} items`,
+    ofN:           (d,t) => `${d} of ${t} assigned`,
+    nameHolder:    'Item name...',
+    eliminate:     'Remove',
+    nameField:     'Name',
+    priceField:    'Price',
+    restHolder:    'Name...',
+    total:         'Total',
+    nueva:         'New',
+    histNav:       'History',
+    exportNav:     'Export',
+    taxPanel:      'Taxes',
+    taxReset:      'PR Default',
+    taxFoodLbl:    'Food tax',
+    taxAlcLbl:     'Alcohol tax',
+    taxNote:       'Rates set for Puerto Rico. Change them if you are in another country.',
+    taxNoteCustom: 'Custom tax rates active.',
+    noTax:         'No tax',
+  }
+};
+
+// Detect language: saved preference > browser language > default ES
+let lang = localStorage.getItem('frac_lang') ||
+  (navigator.language || navigator.userLanguage || 'es').startsWith('en') ? 'en' : 'es';
+// Fix: properly evaluate
+lang = localStorage.getItem('frac_lang') || 
+  ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'es');
+
+let S = STRINGS[lang];
+
+function setLang(l) {
+  lang = l;
+  S = STRINGS[l];
+  localStorage.setItem('frac_lang', l);
+  applyStrings();
+}
+
+function applyStrings() {
+  S = STRINGS[lang];
+  // Static text elements
+  const map = {
+    'logo-tag':       S.tagline,
+    'cam-btn-lbl':    S.camBtn,
+    'gal-btn-lbl':    S.galBtn,
+    'sc-card-title':  S.participants,
+    'rest-label':     S.restaurant,
+    'date-label':     S.date,
+    'scan-btn':       S.scanBtn,
+    'manual-btn-lbl': S.manualBtn,
+    'scan-h2':        S.scanTitle,
+    'scan-provider-label': S.scanSub,
+    'step-s1':        S.step1,
+    'step-s2':        S.step2,
+    'step-s3':        S.step3,
+    'drag-hint-lbl':  S.dragHint,
+    'back-start-btn': S.backStart,
+    'back-adjust-btn':S.backAdjust,
+    'tip-card-label': S.tipLabel,
+    'tip-fixed-label':S.tipFixed,
+    'hist-title':     S.histTitle,
+    'hist-sub':       S.histSub,
+    'modal-q':        S.modalQ,
+    'unassigned-lbl': S.unassignedLbl,
+    'assigned-lbl':   S.assignedLbl,
+    'tax-panel-title':S.taxPanel,
+    'tax-reset-btn':  S.taxReset,
+    'tax-food-label': S.taxFoodLbl,
+    'tax-alc-label':  S.taxAlcLbl,
+    'tax-note':       taxCustomized ? S.taxNoteCustom : S.taxNote,
+  };
+  Object.entries(map).forEach(([id, txt]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  });
+  // Tip pills
+  const tips = ['tip-std','tip-good','tip-great','tip-wow'];
+  const tipLbls = [S.tipStd, S.tipGood, S.tipGreat, S.tipWow];
+  tips.forEach((id,i) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = tipLbls[i];
+  });
+  // Buttons with data-key
+  document.querySelectorAll('[data-lbl]').forEach(el => {
+    const key = el.dataset.lbl;
+    if (S[key]) el.textContent = S[key];
+  });
+  // Input placeholders
+  const phMap = {
+    'rest-in':   S.restHolder,
+    'ni-name':   S.nameHolder,
+  };
+  Object.entries(phMap).forEach(([id, ph]) => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = ph;
+  });
+  // Lang toggle button
+  const btn = document.getElementById('lang-toggle');
+  if (btn) btn.textContent = lang === 'es' ? 'EN' : 'ES';
+  // Re-render dynamic content if split view is active
+  if (document.getElementById('v-split')?.classList.contains('show')) {
+    renderItems(); renderDropZones(); updProgress();
+  }
+  if (document.getElementById('v-results')?.classList.contains('show')) {
+    renderCards();
+  }
+  if (document.getElementById('v-hist')?.classList.contains('show')) {
+    renderHist();
+  }
+}
+</script>
+
+<script>
 const COLORS=['av0','av1','av2','av3','av4','av5'];
 const LABELS=['P1','P2','P3','P4','P5','P6'];
 const ALC=['beer','cerveza','wine','vino','rum','ron','whiskey','cocktail','margarita','sangria','licor','vodka','gin','tequila','corona','medalla','heineken','budweiser','coors','seltzer','mojito','piña colada','daiquiri','shot','shots','cava','champagne','prosecco','sake','pale ale','ipa','lager','stout','porter','draft','draught'];
@@ -1170,7 +1529,7 @@ function onFile(input){
   const file=input.files[0];
   if(!file) return;
   document.getElementById('photo-btns').style.display='none';
-  showImgStatus('Procesando imagen...');
+  showImgStatus(S.processing);
   const objURL=URL.createObjectURL(file);
   const img=new Image();
   img.onload=()=>{
@@ -1178,7 +1537,7 @@ function onFile(input){
     if(!w0||!h0){
       URL.revokeObjectURL(objURL);showImgStatus('');
       document.getElementById('photo-btns').style.display='grid';
-      alert('Este formato de imagen no es compatible con tu navegador.\nUsa JPG, PNG o WebP.');
+      alert(S.imgErr);
       return;
     }
     const MAX=1800,scale=Math.min(1,MAX/Math.max(w0,h0));
@@ -1190,7 +1549,7 @@ function onFile(input){
     const jpeg=canvas.toDataURL('image/jpeg',0.88);
     if(!jpeg||jpeg==='data:,'){
       showImgStatus('');document.getElementById('photo-btns').style.display='grid';
-      alert('Error al convertir la imagen. Intenta con otra foto.');return;
+      alert(S.imgConvErr);return;
     }
     imgB64=jpeg.split(',')[1];imgMime='image/jpeg';
     document.getElementById('prev-img').src=jpeg;
@@ -1201,7 +1560,7 @@ function onFile(input){
   img.onerror=()=>{
     URL.revokeObjectURL(objURL);showImgStatus('');
     document.getElementById('photo-btns').style.display='grid';
-    alert('No se pudo leer esta imagen.\n\nFormatos compatibles: JPG, PNG, WebP, HEIC (iOS), BMP.\n\nSi es HEIC, asegúrate de abrir el app en Safari (iOS) o Chrome (Android).');
+    alert(S.imgFmtErr);
   };
   img.src=objURL;
 }
@@ -1232,17 +1591,19 @@ function renderPNameInputs(){
   for(let i=0;i<pCount;i++){
     const r=document.createElement('div');r.className='pn-row';
     r.innerHTML=`<div class="pav-sm ${COLORS[i]}">${LABELS[i]}</div>
-      <input type="text" placeholder="Persona ${i+1}" value="${old[i]||''}" id="pn-${i}">`;
+      <input type="text" placeholder="${S.personN(i+1)}" value="${old[i]||''}" id="pn-${i}">`;
     c.appendChild(r);
   }
 }
 renderPNameInputs();
 document.getElementById('date-in').value=new Date().toISOString().split('T')[0];
+// Apply language strings on load
+window.addEventListener('DOMContentLoaded',()=>{ applyStrings(); });
 
 function buildPersons(){
   persons=[];
   for(let i=0;i<pCount;i++){
-    const v=document.getElementById(`pn-${i}`)?.value.trim()||`Persona ${i+1}`;
+    const v=document.getElementById(`pn-${i}`)?.value.trim()||S.personN(i+1);
     persons.push({id:i,name:v,color:COLORS[i],label:LABELS[i]});
   }
 }
@@ -1250,10 +1611,10 @@ function buildPersons(){
 function chQty(d){newQty=Math.max(1,Math.min(20,newQty+d));document.getElementById('qty-disp').textContent=newQty;}
 
 async function startScan(){
-  if(!imgB64||imgB64.length<100){alert('La imagen no se procesó correctamente. Vuelve a seleccionarla.');return;}
+  if(!imgB64||imgB64.length<100){alert(S.imgBadErr);return;}
   buildPersons();showV('v-scanning');
   const lbl=document.getElementById('scan-provider-label');
-  if(lbl) lbl.textContent='Preparando OCR...';
+  if(lbl) lbl.textContent=S.step1+'...';
   try{
     const byteChars=atob(imgB64);
     const byteArr=new Uint8Array(byteChars.length);
@@ -1264,7 +1625,7 @@ async function startScan(){
       logger:m=>{
         if(m.status==='recognizing text'){
           markS('s1','s2');
-          if(lbl) lbl.textContent='Reconociendo texto...';
+          if(lbl) lbl.textContent=S.step2+'...';
         }
       }
     });
@@ -1273,7 +1634,7 @@ async function startScan(){
     await worker.terminate();
     URL.revokeObjectURL(imgUrl);
     markS('s2','s3');
-    if(lbl) lbl.textContent='Analizando líneas...';
+    if(lbl) lbl.textContent=S.step3+'...';
 
     const IGNORE=/^(subtotal|sub-total|total tax|total|balance due|balance|municipal tax|munincipal tax|reducido tax|estate tax|state tax|excise tax|iva|ivu|itbms|tax|change|cash due|visa|mastercard|amex|discover|auth|approval|gratuity|service charge|mesa|table|check #|receipt|server:|cashier|cajero|guests?:|phone|tel:|fax|www\.|http|tip is|gracias|thank you|suggested|\d+%\s*=)/i;
     const ALCOHOL=/beer|cerveza|vino|wine|ron|rum|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|liquor|champagne|sangria|mojito|mule|moscow|blond|ipa|lager|seltzer|pale ale|draft|draught|coors|budweiser|bud |heineken|smirnoff|baileys|kahlua|malibu|hennessy|jack daniel|patron|bacardi|jose cuervo/i;
@@ -1309,13 +1670,13 @@ async function startScan(){
 
     markS('s3');
     if(items.length===0){
-      alert('No se detectaron artículos.\nVerifica que la foto sea clara e iluminada, o ingresa manualmente.');
+      alert(S.noItems);
       buildPersons();initSplit();return;
     }
     setTimeout(()=>initSplit(),350);
   }catch(err){
     console.error('OCR error:',err);
-    alert('Error al leer el recibo.\nPuedes ingresar los artículos manualmente.');
+    alert(S.ocrErr);
     buildPersons();items=[];initSplit();
   }
 }
@@ -1329,12 +1690,13 @@ function manualMode(){buildPersons();items=[];initSplit();}
 
 function initSplit(){
   showV('v-split');
-  document.getElementById('sp-rest').textContent=document.getElementById('rest-in').value||'Restaurante';
+  document.getElementById('sp-rest').textContent=document.getElementById('rest-in').value||S.restaurant;
   document.getElementById('sp-dt').textContent=fmtDate(document.getElementById('date-in').value);
   renderDropZones();renderItems();updProgress();
   newQty=1;document.getElementById('qty-disp').textContent='1';
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
+  const _ul=document.querySelector('#v-split .sl');if(_ul)_ul.textContent=S.unassignedLbl;
 }
 
 function renderDropZones(){
@@ -1351,7 +1713,7 @@ function renderDropZones(){
       <div class="dz-av ${p.color}">${p.label}</div>
       <div class="dz-name">${p.name}</div>
       <div class="dz-amt">$${f(amt)}</div>
-      ${cnt>0?`<div class="dz-count">${cnt} art.</div>`:''}
+      ${cnt>0?`<div class="dz-count">${S.artN(cnt)}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -1445,7 +1807,7 @@ function itemHTML(item,assigned){
     <div class="ic-body" onclick="openModal(${item.id})">
       <div class="il">
         <div class="in">${escH(item.name)}</div>
-        <span class="ib">${alc?'Alcohol · 11.5%':'Comida · 7%'}</span>
+        <span class="ib">${alc?S.alc11():S.food7()}</span>
         ${assigned?`<div class="achips">${chips}</div>`:''}
       </div>
       <div class="ir">
@@ -1455,12 +1817,12 @@ function itemHTML(item,assigned){
     </div>
     <div class="ie" id="ie-${item.id}">
       <div class="er">
-        <input type="text" placeholder="Nombre" value="${escA(item.name)}" oninput="updF(${item.id},'name',this.value)">
-        <input type="number" placeholder="Precio" value="${item.price||''}" step="0.01" min="0" oninput="updF(${item.id},'price',parseFloat(this.value)||0)">
+        <input type="text" placeholder="${S.nameField}" value="${escA(item.name)}" oninput="updF(${item.id},'name',this.value)">
+        <input type="number" placeholder="${S.priceField}" value="${item.price||''}" step="0.01" min="0" oninput="updF(${item.id},'price',parseFloat(this.value)||0)">
       </div>
       <div class="ea">
-        <label class="alt"><input type="checkbox" ${alc?'checked':''} onchange="updF(${item.id},'isAlcohol',this.checked)"> Alcohol</label>
-        <button class="bdel" onclick="delItem(${item.id})">Eliminar</button>
+        <label class="alt"><input type="checkbox" ${alc?'checked':''} onchange="updF(${item.id},'isAlcohol',this.checked)">${S.alcohol}</label>
+        <button class="bdel" onclick="delItem(${item.id})">${S.eliminate}</button>
       </div>
     </div>
   </div>`;
@@ -1474,7 +1836,7 @@ function updF(id,fld,v){
   if(fld==='name'||fld==='isAlcohol'){
     const alc=item.isAlcohol||isAlcN(item.name);
     const b=document.querySelector('#ic-'+id+' .ib');
-    if(b)b.textContent=alc?'Alcohol · 11.5%':'Comida · 7%';
+    if(b)b.textContent=alc?S.alc11():S.food7();
   }
 }
 function delItem(id){items=items.filter(i=>i.id!==id);renderItems();renderDropZones();updProgress();}
@@ -1484,7 +1846,7 @@ function addItem(){
   const price=parseFloat(document.getElementById('ni-price').value)||0;
   const isAlc=document.getElementById('ni-alc').checked||isAlcN(name);
   if(!name&&!price)return;
-  for(let q=0;q<newQty;q++) items.unshift({id:Date.now()+q,name:name||'Artículo',price,isAlcohol:isAlc,assignedTo:[]});
+  for(let q=0;q<newQty;q++) items.unshift({id:Date.now()+q,name:name||S.artItem,price,isAlcohol:isAlc,assignedTo:[]});
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
   newQty=1;document.getElementById('qty-disp').textContent='1';
@@ -1497,7 +1859,7 @@ function renderItems(){
   const as=items.filter(i=>i.assignedTo.length>0);
   document.getElementById('unassigned').innerHTML=un.length
     ?un.map(i=>itemHTML(i,false)).join('')
-    :`<div class="all-done">Todos los artículos asignados</div>`;
+    :`<div class="all-done">${S.allAssigned}</div>`;
   document.getElementById('assigned').innerHTML=as.map(i=>itemHTML(i,true)).join('');
   document.getElementById('assigned-sec').style.display=as.length?'block':'none';
   updAmts();
@@ -1510,8 +1872,8 @@ function updAmts(){
     const dz=document.getElementById('dz-'+p.id);if(!dz)return;
     const amtEl=dz.querySelector('.dz-amt');if(amtEl)amtEl.textContent='$'+f2(t);
     const cntEl=dz.querySelector('.dz-count');
-    if(cnt>0&&!cntEl){const d=document.createElement('div');d.className='dz-count';d.textContent=cnt+' art.';dz.appendChild(d);}
-    else if(cntEl)cntEl.textContent=cnt>0?cnt+' art.':'';
+    if(cnt>0&&!cntEl){const d=document.createElement('div');d.className='dz-count';d.textContent=S.artN(cnt);dz.appendChild(d);}
+    else if(cntEl)cntEl.textContent=cnt>0?S.artN(cnt):'';
     dz.classList.toggle('has-items',cnt>0);
   });
 }
@@ -1520,7 +1882,7 @@ function updProgress(){
   const total=items.filter(i=>i.price>0).length;
   const done=items.filter(i=>i.price>0&&i.assignedTo.length>0).length;
   document.getElementById('pf').style.width=(total>0?(done/total)*100:0)+'%';
-  document.getElementById('pt').textContent=`${done} de ${total} asignados`;
+  document.getElementById('pt').textContent=S.ofN(done,total);
   document.getElementById('sp-tot').textContent='$'+f2(items.reduce((s,i)=>s+(i.price>0?i.price:0),0));
 }
 
@@ -1555,9 +1917,10 @@ function confirmAssign(){
 
 function goResults(){
   tipPct=0;tipFix=null;tipMode='pct';
+  initTaxPanel();
   document.getElementById('tip-fix').value='';
   showV('v-results');
-  document.getElementById('r-rest').textContent=document.getElementById('rest-in').value||'Restaurante';
+  document.getElementById('r-rest').textContent=document.getElementById('rest-in').value||S.restaurant;
   document.getElementById('r-date').textContent=fmtDate(document.getElementById('date-in').value);
   document.querySelectorAll('.tp').forEach(b=>b.classList.remove('sel'));
   renderCards();
@@ -1565,6 +1928,80 @@ function goResults(){
 
 function setTip(p){tipPct=p;tipFix=null;tipMode='pct';document.getElementById('tip-fix').value='';document.querySelectorAll('.tp').forEach(b=>b.classList.toggle('sel',parseInt(b.textContent)===p));renderCards();}
 function setTipFix(v){tipFix=parseFloat(v)||0;tipPct=null;tipMode='fix';document.querySelectorAll('.tp').forEach(b=>b.classList.remove('sel'));renderCards();}
+
+
+// ═══════════════════════════════════════════════
+//  TAX CONFIGURATION
+//  PR defaults: food 7%, alcohol 11.5%
+//  User can change per session; saved in localStorage
+// ═══════════════════════════════════════════════
+const TAX_PR_FOOD = 7;
+const TAX_PR_ALC  = 11.5;
+
+let taxFood = parseFloat(localStorage.getItem('frac_tax_food') ?? TAX_PR_FOOD);
+let taxAlc  = parseFloat(localStorage.getItem('frac_tax_alc')  ?? TAX_PR_ALC);
+let taxCustomized = taxFood !== TAX_PR_FOOD || taxAlc !== TAX_PR_ALC;
+
+
+// Geo hint — suggest tax adjustment if timezone is not US/Caribbean
+(function checkGeo() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    const isUS = /America\/(?:New_York|Chicago|Denver|Los_Angeles|Puerto_Rico|Virgin|Phoenix|Anchorage|Honolulu|Indiana|Kentucky|North_Dakota|Boise|Juneau|Adak|Sitka)/.test(tz);
+    const isPR = /Puerto_Rico|Virgin/.test(tz);
+    if (!isPR && !taxCustomized) {
+      // Store detected region for UI hint
+      window._fracTzRegion = isPR ? 'pr' : isUS ? 'us' : 'intl';
+    }
+  } catch(e) {}
+})();
+function updateTax(type, val) {
+  const v = parseFloat(val);
+  if (isNaN(v) || v < 0 || v > 50) return;
+  if (type === 'food') {
+    taxFood = v;
+    localStorage.setItem('frac_tax_food', v);
+  } else {
+    taxAlc = v;
+    localStorage.setItem('frac_tax_alc', v);
+  }
+  taxCustomized = taxFood !== TAX_PR_FOOD || taxAlc !== TAX_PR_ALC;
+  updateTaxUI();
+  renderCards();
+}
+
+function resetTaxPR() {
+  taxFood = TAX_PR_FOOD;
+  taxAlc  = TAX_PR_ALC;
+  taxCustomized = false;
+  localStorage.removeItem('frac_tax_food');
+  localStorage.removeItem('frac_tax_alc');
+  document.getElementById('tax-food-input').value = TAX_PR_FOOD;
+  document.getElementById('tax-alc-input').value  = TAX_PR_ALC;
+  updateTaxUI();
+  renderCards();
+}
+
+function updateTaxUI() {
+  // Badge: show PR if defaults, else "Custom"
+  const badge = document.getElementById('tax-location-badge');
+  const note  = document.getElementById('tax-note');
+  const resetBtn = document.getElementById('tax-reset-btn');
+  if (badge) badge.textContent = taxCustomized ? (lang==='es'?'Personalizado':'Custom') : 'Puerto Rico';
+  if (note)  note.textContent  = taxCustomized ? S.taxNoteCustom : S.taxNote;
+  if (resetBtn) resetBtn.style.display = taxCustomized ? 'block' : 'none';
+  // Sync inputs in case called from reset
+  const fi = document.getElementById('tax-food-input');
+  const ai = document.getElementById('tax-alc-input');
+  if (fi) fi.value = taxFood;
+  if (ai) ai.value = taxAlc;
+}
+
+function initTaxPanel() {
+  document.getElementById('tax-food-input').value = taxFood;
+  document.getElementById('tax-alc-input').value  = taxAlc;
+  updateTaxUI();
+}
 
 function calcRes(){
   const sub=items.reduce((s,i)=>s+Math.max(0,i.price),0);
@@ -1578,7 +2015,7 @@ function calcRes(){
       if(alc)as+=sh;else fs+=sh;
       mi.push({name:i.name,share:sh,isAlcohol:alc});
     });
-    const ms=fs+as,ft=fs*.07,at=as*.115,ts=sub>0?tot*(ms/sub):0;
+    const ms=fs+as,ft=fs*(taxFood/100),at=as*(taxAlc/100),ts=sub>0?tot*(ms/sub):0;
     return{...p,fs,as,ft,at,ts,total:ms+ft+at+ts,mi};
   });
   return{ps,grand:ps.reduce((s,p)=>s+p.total,0),tot};
@@ -1592,9 +2029,9 @@ function renderCards(){
     return`<div class="glass-bright pc">
       <div class="ph"><div class="pav ${p.color}">${p.label}</div><div class="pnm">${p.name}</div><div class="ptot">$${f2(p.total)}</div></div>
       ${p.mi.map(i=>`<div class="pi"><span>${escH(i.name)}${i.isAlcohol?' · alc':''}</span><span>$${f2(Math.max(0,i.share))}</span></div>`).join('')}
-      ${p.fs>0?`<div class="pl"><span>Tax comida (7%)</span><span>$${f2(p.ft)}</span></div>`:''}
-      ${p.as>0?`<div class="pl"><span>Tax alcohol (11.5%)</span><span>$${f2(p.at)}</span></div>`:''}
-      ${p.ts>0.01?`<div class="pl"><span>Propina${tipPct?` (${tipPct}%)`:''}</span><span>$${f2(p.ts)}</span></div>`:''}
+      ${p.fs>0?`<div class="pl"><span>${S.taxFoodLbl} (${taxFood}%)</span><span>$${f2(p.ft)}</span></div>`:''}
+      ${p.as>0?`<div class="pl"><span>${S.taxAlcLbl} (${taxAlc}%)</span><span>$${f2(p.at)}</span></div>`:''}
+      ${p.ts>0.01?`<div class="pl"><span>${S.tip}${tipPct?` (${tipPct}%)`:''}`</span><span>$${f2(p.ts)}</span></div>`:''}
       <div class="pl tot"><span>Total a pagar</span><span style="color:var(--a)">$${f2(p.total)}</span></div>
     </div>`;
   }).join('');
@@ -1603,7 +2040,7 @@ function renderCards(){
 function renderHist(){
   const c=document.getElementById('hist-list');
   if(!hist.length){
-    c.innerHTML=`<div class="he"><div style="font-size:32px;opacity:.15;margin-bottom:12px;font-family:var(--mono)">—</div><div style="font-size:14px;font-weight:700;margin-bottom:5px;letter-spacing:-.02em">Sin visitas aún</div><div style="font-size:12px">Completa una cuenta y guárdala</div></div>`;
+    c.innerHTML=`<div class="he"><div style="font-size:32px;opacity:.15;margin-bottom:12px;font-family:var(--mono)">—</div><div style="font-size:14px;font-weight:700;margin-bottom:5px;letter-spacing:-.02em">${S.noVisits}</div><div style="font-size:12px">${S.noVisitsSub}</div></div>`;
     return;
   }
   c.innerHTML=hist.map(e=>`
@@ -1611,7 +2048,7 @@ function renderHist(){
       <div class="hh"><div><div class="hr">${e.restaurant}</div><div class="hd">${fmtDate(e.date)}</div></div><div class="ht">$${f2(e.grandTotal)}</div></div>
       <div class="hp">
         ${e.persons.filter(p=>p.total>0).map(p=>`<span class="hc">${p.name}: $${f2(p.total)}</span>`).join('')}
-        ${e.tipTotal>0?`<span class="hc g">Propina: $${f2(e.tipTotal)}</span>`:''}
+        ${e.tipTotal>0?`<span class="hc g">${S.tip}: $${f2(e.tipTotal)}</span>`:''}
       </div>
     </div>`).join('');
 }
@@ -1619,12 +2056,14 @@ function renderHist(){
 function saveNew(){
   const{ps,grand,tot}=calcRes();
   hist.unshift({id:Date.now(),date:document.getElementById('date-in').value,
-    restaurant:document.getElementById('rest-in').value||'Restaurante',
+    restaurant:document.getElementById('rest-in').value||S.restaurant,
     persons:ps.map(p=>({name:p.name,total:p.total})),tipTotal:tot,grandTotal:grand});
   localStorage.setItem('sc_h',JSON.stringify(hist));
   items=[];persons=[];imgB64=null;imgMime='image/jpeg';
   document.getElementById('rest-in').value='';
   document.getElementById('date-in').value=new Date().toISOString().split('T')[0];
+// Apply language strings on load
+window.addEventListener('DOMContentLoaded',()=>{ applyStrings(); });
   document.getElementById('prev-w').style.display='none';
   document.getElementById('photo-btns').style.display='grid';
   document.getElementById('scan-btn').disabled=true;
@@ -1636,7 +2075,7 @@ function saveNew(){
 
 const PNAMES=['Persona 1','Persona 2','Persona 3','Persona 4','Persona 5','Persona 6'];
 function exportCSV(){
-  if(!hist.length){alert('Guarda al menos una cuenta primero');return;}
+  if(!hist.length){alert(S.noHistory);return;}
   const h=['Fecha','Restaurante',...PNAMES,'Propina ($)','Total'];
   const rows=hist.map(e=>{
     const a=PNAMES.map((_,i)=>{const p=e.persons[i];return p?f2(p.total):'0.00';});
@@ -1658,7 +2097,7 @@ document.getElementById('ni-price')?.addEventListener('keydown',e=>{if(e.key==='
 document.getElementById('ni-name')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ni-price')?.focus();});
 
 function backToUpload(){
-  if(items.length>0){if(!confirm('¿Volver al inicio? Se perderán los artículos actuales.'))return;}
+  if(items.length>0){if(!confirm(S.backConfirm))return;}
   items=[];persons=[];showV('v-upload');
 }
 function backToSplit(){
