@@ -333,18 +333,20 @@ label {
   margin: 0 auto 10px;
 }
 .logo-tag {
-  font-size: 9px; font-weight: 700;
-  color: rgba(245,240,232,.38);
-  letter-spacing: .28em; text-transform: uppercase;
+  font-size: 13px; font-weight: 400;
+  color: rgba(245,240,232,.60);
+  letter-spacing: -.01em;
+  font-style: italic;
+  margin-bottom: 5px;
+  text-transform: none;
 }
 .logo-attrs {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .22em;
-  text-transform: uppercase;
+  font-size: 9px; font-weight: 700;
   color: var(--gold);
+  letter-spacing: .26em;
+  text-transform: uppercase;
   opacity: .70;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 /* Photo buttons */
@@ -1076,9 +1078,12 @@ label {
 .scan-hint-txt {
   font-size: 11px;
   color: var(--t3);
-  line-height: 1.5;
-  margin: 8px 0 0;
+  line-height: 1.6;
+  margin: 10px 4px 0;
   letter-spacing: .01em;
+  text-align: center;
+  font-style: italic;
+  padding: 0 4px;
 }
 </style>
 
@@ -1127,6 +1132,7 @@ label {
         <span id="gal-lbl">Galería</span>
       </div>
     </div>
+    <p class="scan-hint-txt" id="scan-hint-txt">Captura solo los artículos del recibo, de cerca y desde arriba. Los totales e impuestos los calculamos nosotros.</p>
     <input type="file" id="inp-cam" accept="image/*" capture="environment" style="display:none" onchange="onFile(this)">
     <input type="file" id="inp-gal" accept="image/*,image/heic,image/heif,.heic,.heif" style="display:none" onchange="onFile(this)">
 
@@ -1154,7 +1160,6 @@ label {
     </div>
     <div class="bot-btns">
       <button class="btn bt" id="scan-btn" onclick="startScan()" disabled>Leer recibo</button>
-      <p class="scan-hint-txt">Captura solo los artículos del recibo, de cerca y desde arriba. Los totales e impuestos los calculamos nosotros.</p>
       <button class="btn bgl" onclick="manualMode()" style="font-size:14px;padding:12px"><span id="manual-lbl">Ingresar manualmente</span></button>
     </div>
   </div>
@@ -2445,75 +2450,118 @@ function shareCard(){
   const {ps, grand} = calcRes();
   document.getElementById('sc-restaurant').textContent =
     document.getElementById('rest-in').value || 'Restaurante';
-  document.getElementById('sc-date').textContent =
-    document.getElementById('date-in').value || '';
-  document.getElementById('sc-grand').textContent = '$' + f2(grand);
+  const dv = document.getElementById('date-in').value;
+  document.getElementById('sc-date').textContent = dv
+    ? new Date(dv + 'T12:00:00').toLocaleDateString('es-PR',{weekday:'long', year:'numeric', month:'long', day:'numeric'})
+    : '';
+  document.getElementById('sc-grand').textContent = f2(grand);
 
   const perDiv = document.getElementById('sc-persons');
   perDiv.innerHTML = '';
   ps.forEach(p => {
+    const ini = p.name.charAt(0).toUpperCase();
     perDiv.innerHTML += `
       <div style="display:flex;justify-content:space-between;align-items:center;
-                  padding:10px 12px;background:rgba(20,17,14,.8);
-                  border:1px solid rgba(201,168,76,.18);border-radius:10px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:30px;height:30px;border-radius:99px;
-                      background:linear-gradient(135deg,#a5b4fc,#4f46e5);
+                  padding:11px 14px;
+                  background:rgba(26,20,14,.90);
+                  border:1px solid rgba(201,168,76,.16);
+                  border-radius:11px;margin-bottom:0">
+        <div style="display:flex;align-items:center;gap:11px">
+          <div style="width:34px;height:34px;border-radius:99px;flex-shrink:0;
+                      background:linear-gradient(135deg,#c9a84c 0%,#7a5420 100%);
                       display:flex;align-items:center;justify-content:center;
-                      font-size:13px;font-weight:700;color:#fff">
-            ${p.name.charAt(0).toUpperCase()}
-          </div>
-          <span style="font-size:13px;color:#F5F0E8;font-weight:500">${p.name}</span>
+                      font-size:14px;font-weight:900;color:#080706;
+                      border:1px solid rgba(201,168,76,.40);">${ini}</div>
+          <span style="font-size:13px;color:#F5F0E8;font-weight:600;
+                       letter-spacing:-.01em">${p.name}</span>
         </div>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:15px;
-                     font-weight:700;color:#E8D5A3">$${f2(p.total)}</span>
+        <div style="display:flex;align-items:baseline;gap:2px">
+          <span style="font-size:11px;font-weight:700;color:#C9A84C;
+                       font-family:'JetBrains Mono',monospace">$</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:16px;
+                       font-weight:700;color:#E8D5A3;letter-spacing:-.02em">${f2(p.total)}</span>
+        </div>
       </div>`;
   });
 
   const card = document.getElementById('share-card');
   card.style.left = '-9999px';
-  document.body.appendChild(card);
 
-  html2canvas(card, { backgroundColor: '#0F0D0B', scale: 2 }).then(canvas => {
-    canvas.toBlob(blob => {
-      const file = new File([blob], 'frac-resumen.png', { type: 'image/png' });
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: 'Frac · Resumen' });
-      } else {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'frac-resumen.png';
-        a.click();
-      }
-    }, 'image/png');
-  });
+  setTimeout(() => {
+    html2canvas(card,{
+      backgroundColor:'#080706',
+      scale:2.5,
+      useCORS:true,
+      allowTaint:true,
+      logging:false,
+      removeContainer:true
+    }).then(canvas=>{
+      canvas.toBlob(blob=>{
+        const file = new File([blob],'frac-resumen.png',{type:'image/png'});
+        if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+          navigator.share({files:[file],title:'Frac · Resumen de la noche'}).catch(()=>{});
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'frac-resumen.png';
+          a.click();
+        }
+      },'image/png');
+    });
+  },80);
 }
 </script>
 
+<!-- ════ FRAC SHARE CARD ════ -->
 <div id="share-card" style="
-  position:fixed; left:-9999px; top:0;
-  width:380px; padding:32px 28px 24px;
-  background:#0F0D0B;
+  position:fixed;left:-9999px;top:0;z-index:-1;
+  width:390px;
+  padding:36px 30px 28px;
+  background:linear-gradient(145deg,#1c1712 0%,#0f0d0b 55%,#080706 100%);
   font-family:'Inter',sans-serif;
-  border:1px solid rgba(201,168,76,.28);
-  border-radius:18px;
 ">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-    <svg width="22" height="22" viewBox="0 0 30 30" fill="none">
-      <line x1="6" y1="10" x2="24" y2="10" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="15" cy="15" r="2.5" fill="#E8D5A3"/>
-      <line x1="6" y1="20" x2="24" y2="20" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-    <span style="font-size:18px;font-weight:900;color:#F5F0E8;letter-spacing:-.03em">Frac</span>
+  <div style="position:absolute;top:-60px;right:-60px;width:260px;height:260px;
+    background:radial-gradient(circle,rgba(201,168,76,.10) 0%,transparent 65%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;
+    background:radial-gradient(circle,rgba(201,168,76,.06) 0%,transparent 65%);pointer-events:none"></div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
+        <line x1="5" y1="10" x2="25" y2="10" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="15" cy="15" r="2.8" fill="#E8D5A3"/>
+        <circle cx="15" cy="15" r="5.5" fill="rgba(201,168,76,.14)"/>
+        <line x1="5" y1="20" x2="25" y2="20" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span style="font-size:22px;font-weight:900;color:#F5F0E8;letter-spacing:-.05em;line-height:1">Frac</span>
+    </div>
+    <span style="font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(201,168,76,.45)">RESUMEN</span>
   </div>
-  <div id="sc-restaurant" style="font-size:13px;color:rgba(245,240,232,.55);margin-bottom:2px"></div>
-  <div id="sc-date" style="font-size:11px;color:rgba(245,240,232,.30);margin-bottom:18px"></div>
-  <div id="sc-persons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
-  <div style="border-top:1px solid rgba(201,168,76,.14);padding-top:14px;display:flex;justify-content:space-between;align-items:baseline">
-    <span style="font-size:11px;color:rgba(245,240,232,.35);text-transform:uppercase;letter-spacing:.1em">Total</span>
-    <span id="sc-grand" style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;color:#C9A84C"></span>
+
+  <div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(201,168,76,.12)">
+    <div id="sc-restaurant" style="font-size:16px;font-weight:700;color:#F5F0E8;letter-spacing:-.02em;margin-bottom:4px"></div>
+    <div id="sc-date" style="font-size:11px;color:rgba(245,240,232,.36);letter-spacing:.02em"></div>
   </div>
-  <div style="margin-top:16px;font-size:10px;color:rgba(245,240,232,.18);text-align:center;letter-spacing:.12em;text-transform:uppercase">Dividido con Frac · dividecuenta.vercel.app</div>
+
+  <div id="sc-persons" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px"></div>
+
+  <div style="border-top:1px solid rgba(201,168,76,.16);padding-top:16px;
+              display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:10px;font-weight:700;color:rgba(245,240,232,.32);
+                 text-transform:uppercase;letter-spacing:.14em">Total de la noche</span>
+    <div style="display:flex;align-items:baseline;gap:2px">
+      <span style="font-size:14px;font-weight:700;color:#C9A84C;
+                   font-family:'JetBrains Mono',monospace;line-height:1">$</span>
+      <span id="sc-grand" style="font-family:'JetBrains Mono',monospace;font-size:28px;
+                                  font-weight:800;color:#E8D5A3;letter-spacing:-.03em;line-height:1"></span>
+    </div>
+  </div>
+
+  <div style="margin-top:18px;padding-top:12px;border-top:1px solid rgba(255,255,255,.04);text-align:center">
+    <span style="font-size:9px;color:rgba(245,240,232,.15);letter-spacing:.16em;text-transform:uppercase">
+      Dividido con Frac · dividecuenta.vercel.app
+    </span>
+  </div>
 </div>
 </body>
 </html>
