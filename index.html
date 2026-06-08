@@ -1024,15 +1024,34 @@ label {
 .receipt-overlay-wrap {
   position: relative;
   cursor: crosshair;
+  overflow: hidden;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(201,168,76,.20);
+  background: #000;
   touch-action: none;
+  max-height: 320px;
 }
 .receipt-overlay-wrap img {
-  width: 100%; border-radius: var(--r-sm);
-  border: 1px solid rgba(201,168,76,.20);
-  max-height: 280px; object-fit: contain;
-  background: #000; display: block;
+  width: 100%; display: block;
   pointer-events: none;
+  transform-origin: 0 0;
+  transition: transform 0.05s linear;
+  max-height: 320px; object-fit: contain;
 }
+/* Zoom controls */
+.receipt-zoom-bar {
+  position: absolute; bottom: 36px; right: 10px;
+  display: flex; flex-direction: column; gap: 4px; z-index: 10;
+}
+.zoom-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(8,7,6,.82); border: 1px solid rgba(201,168,76,.30);
+  color: var(--gold-l); font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  -webkit-user-select:none; user-select:none;
+}
+.zoom-btn:active { background: rgba(201,168,76,.2); }
 .receipt-tap-hint {
   position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
   background: rgba(8,7,6,.82); border: 1px solid rgba(201,168,76,.22);
@@ -1122,9 +1141,9 @@ label {
       <div id="scan-tip-body">Cuando se abra la cámara, mantén presionado el botón de captura → selecciona <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS corregirá la perspectiva automáticamente.</div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px" id="photo-btns">
-      <!-- SCAN — full row on first line -->
-      <div class="pbtn-scan" onclick="triggerScan()" style="grid-column:1/-1">
+    <div id="photo-btns">
+      <!-- SCAN — full width primary button -->
+      <div class="pbtn-scan" onclick="triggerScan()" style="margin-bottom:9px">
         <div class="scan-icon-wrap">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3H3v4"/><path d="M19 3h2v4"/><path d="M5 21H3v-4"/><path d="M19 21h2v-4"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
         </div>
@@ -1133,14 +1152,16 @@ label {
           <span class="scan-sub" id="scan-doc-sub">Recomendado — mejor calidad</span>
         </div>
       </div>
-      <!-- CAMERA + GALLERY — equal width, full row -->
-      <div class="pbtn-sm" onclick="triggerCamera()" style="grid-column:1/2">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span id="cam-lbl">Cámara</span>
-      </div>
-      <div class="pbtn-sm" onclick="triggerGallery()" style="grid-column:2/4">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-        <span id="gal-lbl">Galería</span>
+      <!-- CAMERA + GALLERY — perfectly equal -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <div class="pbtn-sm" onclick="triggerCamera()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span id="cam-lbl">Cámara</span>
+        </div>
+        <div class="pbtn-sm" onclick="triggerGallery()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span id="gal-lbl">Galería</span>
+        </div>
       </div>
     </div>
     <input type="file" id="inp-scan" accept="image/*,application/pdf" style="display:none" onchange="onFile(this)">
@@ -1234,7 +1255,12 @@ label {
     <div class="receipt-ref-img-wrap">
       <div class="receipt-overlay-wrap" id="receipt-overlay" onclick="onReceiptTap(event)" ontouchend="onReceiptTap(event);event.preventDefault()">
         <img id="receipt-ref-img" src="" alt="Recibo">
-        <div class="receipt-tap-hint" id="receipt-tap-hint">Toca el recibo para añadir un artículo</div>
+        <div class="receipt-tap-hint" id="receipt-tap-hint">Toca el recibo para leer artículos</div>
+        <!-- Zoom controls -->
+        <div class="receipt-zoom-bar">
+          <div class="zoom-btn" ontouchstart="zoomIn();event.stopPropagation()" onclick="zoomIn();event.stopPropagation()">+</div>
+          <div class="zoom-btn" ontouchstart="zoomOut();event.stopPropagation()" onclick="zoomOut();event.stopPropagation()">−</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1760,7 +1786,7 @@ function initSplit(){
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
   // Clear tap markers from previous session
-  tapMarkers.forEach(m => m.remove()); tapMarkers = [];
+  tapMarkers.forEach(m => m.remove()); tapMarkers = []; _resetZoom();
   // Show receipt reference image if we have one
   const refPanel = document.getElementById('receipt-ref');
   const refImg   = document.getElementById('receipt-ref-img');
@@ -1890,7 +1916,7 @@ function addItem(){
   document.getElementById('ni-name').value='';document.getElementById('ni-price').value='';
   document.getElementById('ni-alc').checked=false;
   // Clear tap markers from previous session
-  tapMarkers.forEach(m => m.remove()); tapMarkers = [];
+  tapMarkers.forEach(m => m.remove()); tapMarkers = []; _resetZoom();
   newQty=1;document.getElementById('qty-disp').textContent='1';
   renderItems();renderDropZones();updProgress();
   document.getElementById('ni-name').focus();
@@ -2060,21 +2086,102 @@ function backToUpload(){if(items.length>0){if(!confirm(L.backConfirm))return;}it
 
 // ── DOCUMENT SCANNER ──
 function triggerScan() {
-  // Show iOS instructions on first use
+  // Always show iOS tip for 8 seconds every time scan is tapped
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const tipShown = localStorage.getItem('frac_scan_tip');
-  if (isIOS && !tipShown) {
-    const tip = document.getElementById('scan-ios-tip');
-    if (tip) {
-      tip.style.display = 'block';
-      localStorage.setItem('frac_scan_tip', '1');
-      // Auto-hide after 5s
-      setTimeout(() => { tip.style.display = 'none'; }, 5000);
+  const tip = document.getElementById('scan-ios-tip');
+  if (tip) {
+    // Clear any previous timer
+    if (window._scanTipTimer) clearTimeout(window._scanTipTimer);
+    tip.style.display = isIOS ? 'block' : 'none';
+    if (isIOS) {
+      window._scanTipTimer = setTimeout(() => { tip.style.display = 'none'; }, 8000);
     }
   }
-  document.getElementById('inp-scan').value = '';
-  document.getElementById('inp-scan').click();
+  // Small delay so tip is visible before camera opens
+  setTimeout(() => {
+    document.getElementById('inp-scan').value = '';
+    document.getElementById('inp-scan').click();
+  }, isIOS ? 600 : 0);
 }
+
+
+// ── RECEIPT IMAGE ZOOM ──
+let _zoomScale = 1, _zoomX = 0, _zoomY = 0;
+let _pinchStartDist = 0, _pinchStartScale = 1;
+let _panStartX = 0, _panStartY = 0, _panTouchX = 0, _panTouchY = 0;
+let _isPanning = false;
+
+function _applyZoom() {
+  const img = document.getElementById('receipt-ref-img');
+  if (!img) return;
+  _zoomScale = Math.max(1, Math.min(5, _zoomScale));
+  if (_zoomScale === 1) { _zoomX = 0; _zoomY = 0; }
+  img.style.transform = `scale(${_zoomScale}) translate(${_zoomX}px, ${_zoomY}px)`;
+}
+
+function zoomIn()  { _zoomScale = Math.min(5, _zoomScale + 0.5); _applyZoom(); }
+function zoomOut() { _zoomScale = Math.max(1, _zoomScale - 0.5); _applyZoom(); }
+
+function _resetZoom() { _zoomScale = 1; _zoomX = 0; _zoomY = 0; _applyZoom(); }
+
+// Pinch to zoom + pan — on the overlay div
+(function setupZoom() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('receipt-overlay');
+    if (!overlay) return;
+
+    overlay.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        _pinchStartDist  = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        _pinchStartScale = _zoomScale;
+        _isPanning = false;
+      } else if (e.touches.length === 1 && _zoomScale > 1) {
+        _isPanning    = true;
+        _panTouchX    = e.touches[0].clientX;
+        _panTouchY    = e.touches[0].clientY;
+        _panStartX    = _zoomX;
+        _panStartY    = _zoomY;
+      }
+    }, { passive: false });
+
+    overlay.addEventListener('touchmove', e => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        _zoomScale = _pinchStartScale * (dist / _pinchStartDist);
+        _applyZoom();
+      } else if (_isPanning && e.touches.length === 1 && _zoomScale > 1) {
+        e.preventDefault();
+        const dx = (e.touches[0].clientX - _panTouchX) / _zoomScale;
+        const dy = (e.touches[0].clientY - _panTouchY) / _zoomScale;
+        _zoomX = _panStartX + dx;
+        _zoomY = _panStartY + dy;
+        _applyZoom();
+      }
+    }, { passive: false });
+
+    overlay.addEventListener('touchend', e => {
+      _isPanning = false;
+      // Double-tap to reset zoom
+      if (e.touches.length === 0 && e.changedTouches.length === 1) {
+        const now = Date.now();
+        if (now - (overlay._lastTap || 0) < 300) {
+          _resetZoom();
+          overlay._lastTap = 0;
+        } else {
+          overlay._lastTap = now;
+        }
+      }
+    });
+  });
+})();
 
 // ── RECEIPT TAP-TO-ADD ──
 let tapMarkers = []; // track placed markers
@@ -2215,9 +2322,11 @@ function backToSplit(){showV('v-split');renderDropZones();renderItems();updProgr
 function toggleReceiptRef() {
   const panel = document.getElementById('receipt-ref');
   if (!panel) return;
+  const wasOpen = panel.classList.contains('open');
   panel.classList.toggle('open');
-  // Re-show tap hint when expanding if no markers placed yet
-  if (panel.classList.contains('open') && tapMarkers.length === 0) {
+  if (!wasOpen) {
+    // Opening: reset zoom, re-show hint
+    _resetZoom();
     const hint = document.getElementById('receipt-tap-hint');
     if (hint) hint.style.display = 'block';
   }
