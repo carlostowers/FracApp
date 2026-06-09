@@ -1085,9 +1085,25 @@ label {
   font-style: italic;
   padding: 0 4px;
 }
+
+/* ─── ATH MÓVIL BUTTON ─── */
+.ath-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; margin-top: 11px; padding: 11px 14px;
+  background: rgba(201,168,76,.10);
+  border: 1px solid rgba(201,168,76,.28);
+  border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 700; font-family: var(--font);
+  color: var(--gold-l); cursor: pointer; text-decoration: none;
+  transition: all 180ms var(--ease-out);
+  -webkit-user-select: none; user-select: none;
+}
+.ath-btn:hover { background: rgba(201,168,76,.18); border-color: rgba(201,168,76,.50); }
+.ath-btn:active { transform: scale(.97); }
+.ath-btn svg { flex-shrink: 0; }
+
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -1111,7 +1127,7 @@ label {
     <div class="logo-word">Fr<em>a</em>c</div>
     <div class="logo-divider"></div>
     <div class="logo-tag" id="logo-tag">El final perfecto de una buena cena.</div>
-    <div class="logo-attrs">PRECISO · DISCRETO · LISTO</div>
+    <div class="logo-attrs" id="logo-attrs-el">PRECISO · DISCRETO · LISTO</div>
     <div style="margin-top:14px">
       <button id="lang-btn" onclick="toggleLang()"
         style="background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.22);
@@ -1175,7 +1191,7 @@ label {
     </div>
   </div>
   <h2 id="scan-h">Analizando recibo</h2>
-  <p id="scan-provider-label">Iniciando reconocimiento de texto…</p>
+  <p id="scan-provider-label">Procesando con IA…</p>
   <div class="ss glass-sm">
     <div class="st on" id="s1"><div class="sd"></div><span id="s1-txt">Preparando OCR</span></div>
     <div class="st"    id="s2"><div class="sd"></div><span id="s2-txt">Reconociendo texto</span></div>
@@ -1341,7 +1357,10 @@ label {
   </div>
   <div class="scroll"><div id="hist-list"></div></div>
   <div style="padding:9px 16px max(14px,env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid rgba(201,168,76,.10)">
-    <button class="btn bgl" onclick="exportCSV()">Exportar CSV para Excel</button>
+    <div style="padding:0;font-size:11px;color:var(--t3);text-align:center;line-height:1.6;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span id="ath-hist-note">El botón de ATH Móvil está en cada cuenta en Resultados</span>
+    </div>
   </div>
 </div>
 
@@ -1412,11 +1431,13 @@ let lang = localStorage.getItem('frac_lang') ||
 
 const T = {
   es: {
-    tagline:'Divide con precisión', cam:'Cámara', gal:'Galería',
+    tagline:'El final perfecto de una buena cena.',
+    attrs:'PRECISO · DISCRETO · LISTO',
+    cam:'Cámara', gal:'Galería',
     people:'Participantes', rest:'Restaurante', date:'Fecha',
     scan:'Leer recibo', manual:'Ingresar manualmente',
     scanH:'Analizando recibo', scanP:'Iniciando OCR…',
-    s1:'Preparando OCR', s2:'Reconociendo texto', s3:'Analizando líneas',
+    s1:'Enviando imagen…', s2:'Analizando con IA…', s3:'Procesando artículos…',
     drag:'Arrastra artículos sobre un participante →',
     receiptRef:'Ver recibo',
     scanTipBody:'Cuando se abra la cámara, mantén presionado el botón de captura → selecciona <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS corregirá la perspectiva automáticamente.',
@@ -1442,6 +1463,7 @@ const T = {
     taxAlcLbl:  ()=>`Tax alcohol (${taxAlc}%)`,
     tipLbl: pct => pct ? `Propina (${pct}%)` : 'Propina',
     totalPay:'Total a pagar',
+    athBtn:'Pagar con ATH Móvil',
     noHist:'Guarda al menos una cuenta primero',
     backConfirm:'¿Volver al inicio? Se perderán los artículos actuales.',
     taxTitle:'Impuestos', taxFoodRow:'Tax comida', taxAlcRow:'Tax alcohol',
@@ -1461,11 +1483,13 @@ const T = {
     alcohol:'Alcohol', del:'Eliminar',
   },
   en: {
-    tagline:'Split with precision', cam:'Camera', gal:'Gallery',
+    tagline:'The perfect end to a good dinner.',
+    attrs:'PRECISE · SEAMLESS · INSTANT',
+    cam:'Camera', gal:'Gallery',
     people:'Participants', rest:'Restaurant', date:'Date',
     scan:'Read receipt', manual:'Enter manually',
     scanH:'Reading receipt', scanP:'Starting OCR…',
-    s1:'Preparing OCR', s2:'Recognizing text', s3:'Analyzing lines',
+    s1:'Sending image…', s2:'Analyzing with AI…', s3:'Processing items…',
     drag:'Drag items onto a participant →',
     receiptRef:'View receipt',
     scanTipBody:'When camera opens, press and hold the capture button → select <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS will auto-correct perspective.',
@@ -1492,6 +1516,7 @@ const T = {
     taxAlcLbl:  ()=>`Alcohol tax (${taxAlc}%)`,
     tipLbl: pct => pct ? `Tip (${pct}%)` : 'Tip',
     totalPay:'Total to pay',
+    athBtn:'Pay with ATH Móvil',
     noHist:'Save at least one bill first',
     backConfirm:'Go back? Current items will be lost.',
     taxTitle:'Taxes', taxFoodRow:'Food tax', taxAlcRow:'Alcohol tax',
@@ -1525,6 +1550,7 @@ function applyLang() {
   L = T[lang];
   const ids = {
     'logo-tag': L.tagline,
+    'logo-attrs-el': L.attrs,
     'cam-lbl': L.cam, 'gal-lbl': L.gal,
     'people-title': L.people,
     'scan-btn': L.scan,
@@ -1542,6 +1568,7 @@ function applyLang() {
     'hist-t': L.histT, 'hist-s': L.histS,
     'modal-q': L.modalQ,
     'tax-title': L.taxTitle,
+    'ath-hist-note': lang==='es'?'El botón de ATH Móvil está en cada cuenta en Resultados':'The ATH Móvil button is in each bill under Results',
     'tax-food-lbl': L.taxFoodRow, 'tax-alc-lbl': L.taxAlcRow,
   };
   Object.entries(ids).forEach(([id,txt])=>{const el=document.getElementById(id);if(el)el.textContent=txt;});
@@ -1756,58 +1783,70 @@ function buildPersons(){
 
 function chQty(d){newQty=Math.max(1,Math.min(20,newQty+d));document.getElementById('qty-disp').textContent=newQty;}
 
-// ── SCAN (Tesseract OCR) ──
+// ── SCAN (Claude Vision via /api/ocr proxy) ──
 async function startScan(){
   if(!imgB64||imgB64.length<100){alert(L.imgBadErr);return;}
   buildPersons();showV('v-scanning');
   const lbl=document.getElementById('scan-provider-label');
   if(lbl)lbl.textContent=L.s1+'...';
+  markS('s1','s2');
+  if(lbl)lbl.textContent=L.s2+'...';
   try{
-    const byteChars=atob(imgB64);const byteArr=new Uint8Array(byteChars.length);
-    for(let i=0;i<byteChars.length;i++)byteArr[i]=byteChars.charCodeAt(i);
-    const blob=new Blob([byteArr],{type:'image/jpeg'});
-    const imgUrl=URL.createObjectURL(blob);
-    const worker=await Tesseract.createWorker('spa+eng',1,{
-      logger:m=>{if(m.status==='recognizing text'){markS('s1','s2');if(lbl)lbl.textContent=L.s2+'...';}}
+    // Call server-side proxy — API key stays in Vercel env, never in browser
+    const res=await fetch('/api/ocr',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({imgB64, lang})
     });
-    markS('s1','s2');
-    const{data:{text, words}}=await worker.recognize(imgUrl);
-    await worker.terminate();URL.revokeObjectURL(imgUrl);
-    markS('s2','s3');if(lbl)lbl.textContent=L.s3+'...';
-    // Store word positions for tap-to-text in split view
-    window._ocrWords = (words||[]).filter(w=>w.confidence>40&&w.text.trim().length>0);
 
-    const IGNORE=/^(subtotal|sub-total|total tax|total|balance due|balance|municipal tax|munincipal tax|reducido tax|estate tax|state tax|excise tax|iva|ivu|itbms|tax|change|cash due|visa|mastercard|amex|discover|auth|approval|gratuity|service charge|mesa|table|check #|receipt|server:|cashier|cajero|guests?:|phone|tel:|fax|www\.|http|tip is|gracias|thank you|suggested|\d+%\s*=)/i;
-    const ALCOHOL=/beer|cerveza|vino|wine|ron|rum|whiskey|whisky|coctel|cocktail|margarita|medalla|corona|heineken|modelo|tequila|vodka|licor|liquor|champagne|sangria|mojito|mule|moscow|blond|ipa|lager|seltzer|pale ale|draft|draught|coors|budweiser|bud |smirnoff|baileys|kahlua|malibu|hennessy|jack daniel|patron|bacardi|jose cuervo/i;
-    const PRICE=/[$]?\s*(\d{1,3}(?:[.]\d{2}))\s*$/;
-    const QTY_AT=/^(.+?)\s*\(?\s*(\d+)\s*@\s*(\d+(?:\.\d{2})?)\s*\)?/;
+    markS('s2','s3');
+    if(lbl)lbl.textContent=L.s3+'...';
 
-    const lines=text.split('\n').map(l=>l.trim().replace(/\s+/g,' ')).filter(Boolean);
-    items=[];let idx=0;
-    lines.forEach(line=>{
-      if(line.length<3||/^\d+$/.test(line)||IGNORE.test(line))return;
-      const qm=line.match(QTY_AT);
-      if(qm){
-        const name=qm[1].trim(),qty=parseInt(qm[2]),unitPrice=parseFloat(qm[3]);
-        if(name.length>=2&&qty>=1&&qty<=20&&unitPrice>0&&unitPrice<=999){
-          for(let q=0;q<qty;q++)items.push({id:Date.now()+idx*100+(q*7),name:qty>1?`${name} (${q+1}/${qty})`:name,price:unitPrice,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
-          idx++;return;
-        }
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      console.error('OCR error:',err);
+      // Fallback message if API key not configured yet
+      if(res.status===500&&err.error==='OCR service not configured'){
+        alert('OCR no configurado. Contacta al administrador.');
+      } else {
+        alert(L.ocrErr);
       }
-      const m=line.match(PRICE);
-      if(m){
-        const price=parseFloat(m[1]);
-        if(price<=0||price>999)return;
-        const name=line.slice(0,line.lastIndexOf(m[0])).replace(/[$]/g,'').trim();
-        if(name.length<2)return;
-        items.push({id:Date.now()+idx*100,name,price,isAlcohol:ALCOHOL.test(name),assignedTo:[]});
+      buildPersons();items=[];initSplit();return;
+    }
+
+    const data=await res.json();
+    const raw=data.items||[];
+
+    // raw = [{name, price, isAlcohol, qty}]
+    items=[];
+    let idx=0;
+    raw.forEach(r=>{
+      if(!r.name||!r.price||r.price<=0||r.price>999)return;
+      const qty=Math.max(1,Math.min(20,parseInt(r.qty)||1));
+      for(let q=0;q<qty;q++){
+        items.push({
+          id:Date.now()+idx*100+(q*7),
+          name:qty>1?`${r.name} (${q+1}/${qty})`:r.name,
+          price:parseFloat(r.price),
+          isAlcohol:!!r.isAlcohol,
+          assignedTo:[]
+        });
         idx++;
       }
     });
+
+    // _ocrWords not available from Claude Vision — tap-to-text uses manual input only
+    window._ocrWords=[];
+
     markS('s3');
     if(items.length===0){alert(L.noItems);buildPersons();initSplit();return;}
     setTimeout(()=>initSplit(),350);
-  }catch(err){console.error(err);alert(L.ocrErr);buildPersons();items=[];initSplit();}
+
+  }catch(err){
+    console.error('Scan error:',err);
+    alert(L.ocrErr);
+    buildPersons();items=[];initSplit();
+  }
 }
 
 function markS(dId,nId){
@@ -2063,6 +2102,10 @@ function renderCards(){
       ${p.as>0?`<div class="pl"><span>${L.taxAlcLbl()}</span><span>$${f2(p.at)}</span></div>`:''}
       ${p.ts>0.01?`<div class="pl"><span>${L.tipLbl(tipPct)}</span><span>$${f2(p.ts)}</span></div>`:''}
       <div class="pl tot"><span>${L.totalPay}</span><span style="color:var(--gold)">$${f2(p.total)}</span></div>
+      <a class="ath-btn" href="athmovil://payment?total=${f2(p.total)}&message=Frac%20%E2%80%93%20${encodeURIComponent(document.getElementById('rest-in').value||'Restaurante')}" >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        ${L.athBtn} · $${f2(p.total)}
+      </a>
     </div>`;
   }).join('');
 }
@@ -2559,7 +2602,7 @@ function shareCard(){
 
   <div style="margin-top:18px;padding-top:12px;border-top:1px solid rgba(255,255,255,.04);text-align:center">
     <span style="font-size:9px;color:rgba(245,240,232,.15);letter-spacing:.16em;text-transform:uppercase">
-      Dividido con Frac · dividecuenta.vercel.app
+      Dividido con Frac · fracapp.vercel.app
     </span>
   </div>
 </div>
