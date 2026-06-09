@@ -1102,6 +1102,19 @@ label {
 .ath-btn:active { transform: scale(.97); }
 .ath-btn svg { flex-shrink: 0; }
 
+
+/* ─── BIRTHDAY BUTTON ─── */
+.bday-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; font-weight: 600; font-family: var(--font);
+  color: var(--t3); padding: 3px 0; margin-top: 4px;
+  transition: color 180ms; -webkit-user-select: none; user-select: none;
+}
+.bday-btn:hover { color: var(--gold-l); }
+.bday-btn.active { color: var(--gold); }
+.bday-btn.active svg { filter: drop-shadow(0 0 4px rgba(201,168,76,.6)); }
+
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1410,6 +1423,32 @@ label {
     <button class="btn bt"  style="padding:10px;font-size:13px" onclick="confirmTapItem()" id="tap-confirm-btn">Añadir</button>
   </div>
 </div>
+
+<!-- ════════ HISTORY DETAIL ════════ -->
+<div class="view" id="v-hist-detail">
+  <div class="view-topbar">
+    <button class="back-btn" onclick="showV('v-hist');renderHist()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span id="hd-back-lbl">Historial</span>
+    </button>
+  </div>
+  <div class="rh">
+    <div class="rh-label" id="hd-rest">Restaurante</div>
+    <div class="rg-wrap">
+      <div class="rg-dollar">$</div>
+      <div class="rg" id="hd-grand">0.00</div>
+    </div>
+    <div class="r-sub" id="hd-date"></div>
+  </div>
+  <div class="scroll">
+    <div id="hd-cards"></div>
+    <div style="height:14px"></div>
+  </div>
+  <div style="padding:10px 16px max(14px,env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid rgba(201,168,76,.10)">
+    <button class="btn bgl" onclick="shareCardFromHist()" id="hd-share-btn">Compartir resumen</button>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 
@@ -1464,6 +1503,9 @@ const T = {
     tipLbl: pct => pct ? `Propina (${pct}%)` : 'Propina',
     totalPay:'Total a pagar',
     athBtn:'Pagar con ATH Móvil',
+    bdayBtn:'Es su cumpleaños 🎂',
+    bdayOn:'Cumpleaños activo 🎂',
+    bdayOff:'Es su cumpleaños 🎂',
     noHist:'Guarda al menos una cuenta primero',
     backConfirm:'¿Volver al inicio? Se perderán los artículos actuales.',
     taxTitle:'Impuestos', taxFoodRow:'Tax comida', taxAlcRow:'Tax alcohol',
@@ -1517,6 +1559,9 @@ const T = {
     tipLbl: pct => pct ? `Tip (${pct}%)` : 'Tip',
     totalPay:'Total to pay',
     athBtn:'Pay with ATH Móvil',
+    bdayBtn:'It\'s their birthday 🎂',
+    bdayOn:'Birthday active 🎂',
+    bdayOff:'It\'s their birthday 🎂',
     noHist:'Save at least one bill first',
     backConfirm:'Go back? Current items will be lost.',
     taxTitle:'Taxes', taxFoodRow:'Food tax', taxAlcRow:'Alcohol tax',
@@ -1625,6 +1670,7 @@ function initTaxPanel() {
 // ── APP STATE ──
 let persons=[],items=[],curItem=null,selPers=[];
 let tipPct=0,tipFix=null,tipMode='pct';
+let bdayPerson=null; // person id whose total splits among everyone else
 let imgB64=null,imgMime='image/jpeg';
 let pCount=2,newQty=1;
 let hist=JSON.parse(localStorage.getItem('sc_h')||'[]');
@@ -2072,10 +2118,109 @@ function goResults(){
 function setTip(p){tipPct=p;tipFix=null;tipMode='pct';document.getElementById('tip-fix').value='';document.querySelectorAll('.tp').forEach(b=>b.classList.toggle('sel',parseInt(b.textContent)===p));renderCards();}
 function setTipFix(v){tipFix=parseFloat(v)||0;tipPct=null;tipMode='fix';document.querySelectorAll('.tp').forEach(b=>b.classList.remove('sel'));renderCards();}
 
+
+// ── GEO TAX DETECTION (ip-api.com, free, no key needed) ──
+const TAX_TABLE = {
+  // country code: [foodTax, alcTax, name]
+  'PR': [7,    11.5, 'Puerto Rico'],
+  'US': [8.5,  8.5,  'United States'],
+  'DO': [18,   18,   'Rep. Dominicana'],
+  'MX': [16,   16,   'México'],
+  'CO': [19,   19,   'Colombia'],
+  'ES': [10,   21,   'España'],
+  'CR': [13,   13,   'Costa Rica'],
+  'PA': [7,    7,    'Panamá'],
+  'PE': [18,   18,   'Perú'],
+  'CL': [19,   19,   'Chile'],
+  'AR': [21,   21,   'Argentina'],
+  'VE': [16,   16,   'Venezuela'],
+  'GT': [12,   12,   'Guatemala'],
+  'HN': [15,   15,   'Honduras'],
+  'SV': [13,   13,   'El Salvador'],
+  'EC': [12,   12,   'Ecuador'],
+  'BO': [13,   13,   'Bolivia'],
+  'UY': [22,   22,   'Uruguay'],
+  'PY': [10,   10,   'Paraguay'],
+  'GB': [20,   20,   'United Kingdom'],
+  'DE': [7,    19,   'Germany'],
+  'FR': [10,   20,   'France'],
+  'IT': [10,   22,   'Italy'],
+  'CA': [13,   13,   'Canada'],
+};
+
+let _geoDetected = false;
+
+async function detectTaxByLocation() {
+  // Skip if user already customized taxes manually
+  if (taxFood !== FOOD_PR || taxAlc !== ALC_PR) return;
+  // Skip if already detected this session
+  if (_geoDetected) return;
+  // Skip if saved preference exists
+  if (localStorage.getItem('frac_tf') || localStorage.getItem('frac_ta')) return;
+
+  try {
+    const res  = await fetch('https://ip-api.com/json/?fields=countryCode', { signal: AbortSignal.timeout(3000) });
+    const data = await res.json();
+    const code = (data.countryCode || '').toUpperCase();
+    if (!code || code === 'PR') { _geoDetected = true; return; } // already PR default
+
+    const entry = TAX_TABLE[code];
+    if (!entry) { _geoDetected = true; return; } // unknown country — keep PR
+
+    const [food, alc, name] = entry;
+    // Only change if different from current
+    if (food !== taxFood || alc !== taxAlc) {
+      taxFood = food; taxAlc = alc;
+      document.getElementById('tax-food-inp').value = food;
+      document.getElementById('tax-alc-inp').value  = alc;
+      // Show a subtle toast notification
+      _showGeoToast(name, food, alc);
+      updateTaxUI();
+      renderCards();
+    }
+    _geoDetected = true;
+  } catch(e) {
+    // Silent fail — keep PR defaults
+    _geoDetected = true;
+  }
+}
+
+function _showGeoToast(country, food, alc) {
+  let toast = document.getElementById('geo-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'geo-toast';
+    toast.style.cssText = `
+      position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+      background:rgba(12,10,8,.96); border:1px solid rgba(201,168,76,.30);
+      border-radius:99px; padding:8px 16px; z-index:500;
+      font-size:11px; font-weight:600; color:var(--gold-l);
+      white-space:nowrap; backdrop-filter:blur(16px);
+      box-shadow:0 4px 20px rgba(0,0,0,.4);
+      transition:opacity .4s; opacity:0;
+      font-family:var(--font);
+    `;
+    document.body.appendChild(toast);
+  }
+  const msg = lang === 'es'
+    ? `📍 Tasas ajustadas para ${country} (${food}% / ${alc}%)`
+    : `📍 Tax rates set for ${country} (${food}% / ${alc}%)`;
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+}
+
+
+// ── BIRTHDAY MODE ──
+function toggleBday(pid) {
+  bdayPerson = (bdayPerson === pid) ? null : pid;
+  renderCards();
+}
+
 function calcRes(){
   const sub=items.reduce((s,i)=>s+Math.max(0,i.price),0);
   const tot=tipMode==='fix'&&tipFix!==null?tipFix:sub*(tipPct||0)/100;
-  const ps=persons.map(p=>{
+  let ps=persons.map(p=>{
     let fs=0,as=0;const mi=[];
     items.forEach(i=>{
       if(!i.assignedTo.includes(p.id))return;
@@ -2087,6 +2232,18 @@ function calcRes(){
     const ms=fs+as,ft=fs*(taxFood/100),at=as*(taxAlc/100),ts=sub>0?tot*(ms/sub):0;
     return{...p,fs,as,ft,at,ts,total:ms+ft+at+ts,mi};
   });
+
+  // ── Birthday mode: distribute bday person's total among everyone else ──
+  if(bdayPerson!==null){
+    const bday=ps.find(p=>p.id===bdayPerson);
+    const others=ps.filter(p=>p.id!==bdayPerson);
+    if(bday&&others.length>0){
+      const share=bday.total/others.length;
+      others.forEach(p=>p.total+=share);
+      bday.total=0;
+    }
+  }
+
   return{ps,grand:ps.reduce((s,p)=>s+p.total,0),tot};
 }
 
@@ -2106,6 +2263,10 @@ function renderCards(){
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         ${L.athBtn} · $${f2(p.total)}
       </a>
+      <button class="bday-btn ${bdayPerson===p.id?'active':''}" onclick="toggleBday(${p.id})">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="${bdayPerson===p.id?'var(--gold)':'none'}" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ${bdayPerson===p.id ? L.bdayOn : L.bdayOff}
+      </button>
     </div>`;
   }).join('');
 }
@@ -2117,13 +2278,18 @@ function renderHist(){
     c.innerHTML=`<div class="he"><div style="font-size:32px;opacity:.15;margin-bottom:12px;font-family:var(--mono)">—</div><div style="font-size:14px;font-weight:700;margin-bottom:5px;letter-spacing:-.02em">${L.noVisit}</div><div style="font-size:12px">${L.noVisitS}</div></div>`;
     return;
   }
-  c.innerHTML=hist.map(e=>`
-    <div class="glass hi">
-      <div class="hh"><div><div class="hr">${e.restaurant}</div><div class="hd">${fmtDate(e.date)}</div></div><div class="ht">$${f2(e.grandTotal)}</div></div>
+  c.innerHTML=hist.map((e,idx)=>`
+    <div class="glass hi" style="cursor:pointer;position:relative" onclick="openHistDetail(${idx})">
+      <div class="hh"><div><div class="hr">${e.restaurant}</div><div class="hd">${fmtDate(e.date)}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div class="ht">$${f2(e.grandTotal)}</div>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(201,168,76,.4)" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+      </div></div>
       <div class="hp">
         ${e.persons.filter(p=>p.total>0).map(p=>`<span class="hc">${p.name}: $${f2(p.total)}</span>`).join('')}
         ${e.tipTotal>0?`<span class="hc g">${L.tip}: $${f2(e.tipTotal)}</span>`:''}
       </div>
+      <button onclick="event.stopPropagation();deleteHist(${idx})" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:rgba(245,240,232,.18);font-size:16px;padding:4px;transition:color 150ms" onmouseenter="this.style.color='var(--err)'" onmouseleave="this.style.color='rgba(245,240,232,.18)'">✕</button>
     </div>`).join('');
 }
 
@@ -2132,7 +2298,14 @@ function saveNew(){
   const{ps,grand,tot}=calcRes();
   hist.unshift({id:Date.now(),date:document.getElementById('date-in').value,
     restaurant:document.getElementById('rest-in').value||L.rest,
-    persons:ps.map(p=>({name:p.name,total:p.total})),tipTotal:tot,grandTotal:grand});
+    persons:ps.map(p=>({
+      name:p.name, total:p.total, color:p.color, label:p.label,
+      items:p.mi.map(i=>({name:i.name,share:i.share,isAlcohol:i.isAlcohol})),
+      ft:p.ft, at:p.at, ts:p.ts
+    })),
+    tipTotal:tot, tipPct:tipPct||0,
+    taxFood, taxAlc,
+    grandTotal:grand});
   localStorage.setItem('sc_h',JSON.stringify(hist));
   items=[];persons=[];imgB64=null;imgMime='image/jpeg';
   document.getElementById('rest-in').value='';
@@ -2160,6 +2333,109 @@ function exportCSV(){
 }
 
 // ── UTILS ──
+
+// ── HISTORY DETAIL ──
+let _histIdx = null;
+
+function openHistDetail(idx) {
+  const e = hist[idx];
+  if (!e) return;
+  _histIdx = idx;
+
+  document.getElementById('hd-rest').textContent  = e.restaurant;
+  document.getElementById('hd-date').textContent  = fmtDate(e.date);
+  document.getElementById('hd-grand').textContent = f2(e.grandTotal);
+
+  const cards = document.getElementById('hd-cards');
+  if (!cards) return;
+
+  // Check if we have full detail (new format) or just totals (old format)
+  const hasDetail = e.persons[0]?.items !== undefined;
+
+  if (hasDetail) {
+    cards.innerHTML = e.persons.filter(p=>p.total>0).map(p=>`
+      <div class="glass-bright pc">
+        <div class="ph">
+          <div class="pav ${p.color||'av0'}">${p.label||p.name.charAt(0)}</div>
+          <div class="pnm">${p.name}</div>
+          <div class="ptot">$${f2(p.total)}</div>
+        </div>
+        ${(p.items||[]).map(i=>`<div class="pi"><span>${escH(i.name)}${i.isAlcohol?' · alc':''}</span><span>$${f2(i.share)}</span></div>`).join('')}
+        ${p.ft>0?`<div class="pl"><span>${lang==='es'?'Tax comida':'Food tax'} (${e.taxFood||7}%)</span><span>$${f2(p.ft)}</span></div>`:''}
+        ${p.at>0?`<div class="pl"><span>${lang==='es'?'Tax alcohol':'Alcohol tax'} (${e.taxAlc||11.5}%)</span><span>$${f2(p.at)}</span></div>`:''}
+        ${p.ts>0.01?`<div class="pl"><span>${lang==='es'?'Propina':'Tip'}${e.tipPct?` (${e.tipPct}%)`:''}</span><span>$${f2(p.ts)}</span></div>`:''}
+        <div class="pl tot"><span>${lang==='es'?'Total a pagar':'Total to pay'}</span><span style="color:var(--gold)">$${f2(p.total)}</span></div>
+        <a class="ath-btn" href="athmovil://payment?total=${f2(p.total)}&message=Frac%20%E2%80%93%20${encodeURIComponent(e.restaurant)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          ${lang==='es'?'Pagar con ATH Móvil':'Pay with ATH Móvil'} · $${f2(p.total)}
+        </a>
+      </div>`).join('');
+  } else {
+    // Old format — just show totals per person
+    cards.innerHTML = e.persons.filter(p=>p.total>0).map(p=>`
+      <div class="glass-bright pc">
+        <div class="ph">
+          <div class="pav av0">${p.name.charAt(0).toUpperCase()}</div>
+          <div class="pnm">${p.name}</div>
+          <div class="ptot">$${f2(p.total)}</div>
+        </div>
+        <div class="pl tot"><span>${lang==='es'?'Total a pagar':'Total to pay'}</span><span style="color:var(--gold)">$${f2(p.total)}</span></div>
+        <a class="ath-btn" href="athmovil://payment?total=${f2(p.total)}&message=Frac%20%E2%80%93%20${encodeURIComponent(e.restaurant)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          ${lang==='es'?'Pagar con ATH Móvil':'Pay with ATH Móvil'} · $${f2(p.total)}
+        </a>
+      </div>`).join('');
+  }
+
+  showV('v-hist-detail');
+}
+
+function deleteHist(idx) {
+  if (!confirm(lang==='es'?'¿Eliminar esta cuenta del historial?':'Delete this bill from history?')) return;
+  hist.splice(idx, 1);
+  localStorage.setItem('sc_h', JSON.stringify(hist));
+  renderHist();
+}
+
+function shareCardFromHist() {
+  const e = hist[_histIdx];
+  if (!e) return;
+  document.getElementById('sc-restaurant').textContent = e.restaurant;
+  document.getElementById('sc-date').textContent       = fmtDate(e.date);
+  document.getElementById('sc-grand').textContent      = '$' + f2(e.grandTotal);
+  const perDiv = document.getElementById('sc-persons');
+  perDiv.innerHTML = '';
+  e.persons.filter(p=>p.total>0).forEach(p=>{
+    perDiv.innerHTML += `
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  padding:10px 12px;background:rgba(20,17,14,.8);
+                  border:1px solid rgba(201,168,76,.18);border-radius:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:30px;height:30px;border-radius:99px;
+                      background:linear-gradient(135deg,#C9A84C,#a8882e);
+                      display:flex;align-items:center;justify-content:center;
+                      font-size:13px;font-weight:700;color:#1a1500">
+            ${p.name.charAt(0).toUpperCase()}
+          </div>
+          <span style="font-size:13px;color:#F5F0E8;font-weight:500">${p.name}</span>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#E8D5A3">$${f2(p.total)}</span>
+      </div>`;
+  });
+  const card = document.getElementById('share-card');
+  html2canvas(card, { backgroundColor:'#0F0D0B', scale:2 }).then(canvas=>{
+    canvas.toBlob(blob=>{
+      const file = new File([blob],'frac-resumen.png',{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'Frac · Resumen'});
+      } else {
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+        a.download='frac-resumen.png';a.click();
+      }
+    },'image/png');
+  });
+}
+
 function showV(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id===id));const el=document.getElementById(id);if(el){const s=el.querySelector('.scroll');if(s)s.scrollTop=0;}}
 function f2(n){return parseFloat(n||0).toFixed(2);}
 function f(n){return parseFloat(n||0).toFixed(2);}
