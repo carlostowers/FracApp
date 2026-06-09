@@ -2217,6 +2217,33 @@ function toggleBday(pid) {
   renderCards();
 }
 
+
+// ── ATH MÓVIL DEEP LINK ──
+function openATH(amount, restaurant) {
+  const msg   = encodeURIComponent('Frac – ' + (restaurant || 'Restaurante'));
+  const url   = `athmovil://payment?total=${amount}&message=${msg}`;
+  const store = 'https://apps.apple.com/us/app/ath-m%C3%B3vil/id658539297';
+
+  // Try deep link — if ATH Móvil is installed it opens, otherwise catch and go to store
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  let opened = false;
+  const timer = setTimeout(() => {
+    if (!opened) window.location.href = store;
+    document.body.removeChild(iframe);
+  }, 1200);
+
+  window.addEventListener('blur', () => {
+    opened = true;
+    clearTimeout(timer);
+    document.body.removeChild(iframe);
+  }, { once: true });
+
+  iframe.src = url;
+}
+
 function calcRes(){
   const sub=items.reduce((s,i)=>s+Math.max(0,i.price),0);
   const tot=tipMode==='fix'&&tipFix!==null?tipFix:sub*(tipPct||0)/100;
@@ -2259,10 +2286,10 @@ function renderCards(){
       ${p.as>0?`<div class="pl"><span>${L.taxAlcLbl()}</span><span>$${f2(p.at)}</span></div>`:''}
       ${p.ts>0.01?`<div class="pl"><span>${L.tipLbl(tipPct)}</span><span>$${f2(p.ts)}</span></div>`:''}
       <div class="pl tot"><span>${L.totalPay}</span><span style="color:var(--gold)">$${f2(p.total)}</span></div>
-      <a class="ath-btn" href="athmovil://payment?total=${f2(p.total)}&message=Frac%20%E2%80%93%20${encodeURIComponent(document.getElementById('rest-in').value||'Restaurante')}" >
+      <button class="ath-btn" onclick="openATH('${f2(p.total)}', document.getElementById('rest-in').value||'Restaurante')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         ${L.athBtn} · $${f2(p.total)}
-      </a>
+      </button>
       <button class="bday-btn ${bdayPerson===p.id?'active':''}" onclick="toggleBday(${p.id})">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="${bdayPerson===p.id?'var(--gold)':'none'}" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         ${bdayPerson===p.id ? L.bdayOn : L.bdayOff}
@@ -2365,10 +2392,10 @@ function openHistDetail(idx) {
         ${p.at>0?`<div class="pl"><span>${lang==='es'?'Tax alcohol':'Alcohol tax'} (${e.taxAlc||11.5}%)</span><span>$${f2(p.at)}</span></div>`:''}
         ${p.ts>0.01?`<div class="pl"><span>${lang==='es'?'Propina':'Tip'}${e.tipPct?` (${e.tipPct}%)`:''}</span><span>$${f2(p.ts)}</span></div>`:''}
         <div class="pl tot"><span>${lang==='es'?'Total a pagar':'Total to pay'}</span><span style="color:var(--gold)">$${f2(p.total)}</span></div>
-        <a class="ath-btn" href="athmovil://payment?total=${f2(p.total)}&message=Frac%20%E2%80%93%20${encodeURIComponent(e.restaurant)}">
+        <button class="ath-btn" onclick="openATH('${f2(p.total)}','${e.restaurant.replace(/'/g,'')}')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           ${lang==='es'?'Pagar con ATH Móvil':'Pay with ATH Móvil'} · $${f2(p.total)}
-        </a>
+        </button>
       </div>`).join('');
   } else {
     // Old format — just show totals per person
@@ -2380,10 +2407,10 @@ function openHistDetail(idx) {
           <div class="ptot">$${f2(p.total)}</div>
         </div>
         <div class="pl tot"><span>${lang==='es'?'Total a pagar':'Total to pay'}</span><span style="color:var(--gold)">$${f2(p.total)}</span></div>
-        <a class="ath-btn" href="athmovil://payment?total=${f2(p.total)}&message=Frac%20%E2%80%93%20${encodeURIComponent(e.restaurant)}">
+        <button class="ath-btn" onclick="openATH('${f2(p.total)}','${e.restaurant.replace(/'/g,'')}')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           ${lang==='es'?'Pagar con ATH Móvil':'Pay with ATH Móvil'} · $${f2(p.total)}
-        </a>
+        </button>
       </div>`).join('');
   }
 
