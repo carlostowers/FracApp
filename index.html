@@ -2845,7 +2845,7 @@ function shareCard(){
       canvas.toBlob(blob=>{
         const file = new File([blob],'frac-resumen.png',{type:'image/png'});
         if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-          navigator.share({files:[file],title:'Frac · Resumen de la noche'}).catch(()=>{});
+          navigator.share({files:[file],title:'Frac · Resumen de la cena'}).catch(()=>{});
         } else {
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
@@ -2894,7 +2894,7 @@ function shareCard(){
   <div style="border-top:1px solid rgba(201,168,76,.16);padding-top:16px;
               display:flex;justify-content:space-between;align-items:center">
     <span style="font-size:10px;font-weight:700;color:rgba(245,240,232,.32);
-                 text-transform:uppercase;letter-spacing:.14em">Total de la noche</span>
+                 text-transform:uppercase;letter-spacing:.14em">Total de la cena</span>
     <div style="display:flex;align-items:baseline;gap:2px">
       <span style="font-size:14px;font-weight:700;color:#C9A84C;
                    font-family:'JetBrains Mono',monospace;line-height:1">$</span>
