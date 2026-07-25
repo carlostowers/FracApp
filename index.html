@@ -1934,11 +1934,18 @@ async function startScan(){
     if(!res.ok){
       const err=await res.json().catch(()=>({}));
       console.error('OCR error:',err);
-      // Fallback message if API key not configured yet
-      if(res.status===500&&err.error==='OCR service not configured'){
-        alert('OCR no configurado. Contacta al administrador.');
+      if(err.error==='OCR service not configured'){
+        alert(lang==='es'
+          ? 'Falta configurar la clave de OCR en el servidor.'
+          : 'OCR key is not configured on the server.');
       } else {
-        alert(L.ocrErr);
+        // Surface the real reason so problems are fixable, not mysterious
+        let why='';
+        if(Array.isArray(err.attempts)&&err.attempts.length){
+          const a=err.attempts[0];
+          why='\n\n['+(a.model||'?')+'] '+String(a.error||a.status||'').slice(0,180);
+        }
+        alert(L.ocrErr+why);
       }
       buildPersons();items=[];initSplit();return;
     }
