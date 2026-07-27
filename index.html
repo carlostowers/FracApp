@@ -1220,7 +1220,7 @@ label {
     <div class="prev-w" id="prev-w">
       <img id="prev-img" src="" alt="Recibo">
       <div class="prev-acts">
-        <button class="btn bgl" style="width:auto;padding:7px 14px;font-size:12px" onclick="changePhoto()">Cambiar foto</button>
+        <button class="btn bgl" style="width:auto;padding:7px 14px;font-size:12px" onclick="changePhoto()" id="change-pic-btn">Cambiar foto</button>
         <span style="font-size:12px;color:var(--ok);font-weight:600;margin-left:auto;align-self:center">✓ Lista</span>
       </div>
     </div>
@@ -1327,7 +1327,7 @@ label {
       </div>
     </div>
 
-    <div class="sl">Sin asignar — arrastra o toca</div>
+    <div class="sl" id="unassigned-lbl">Sin asignar — arrastra o toca</div>
     <div id="unassigned"></div>
 
     <div class="add-bar">
@@ -1349,7 +1349,7 @@ label {
     </div>
 
     <div id="assigned-sec" style="display:none;margin-top:4px">
-      <div class="sl">Artículos asignados</div>
+      <div class="sl" id="assigned-sec-lbl">Artículos asignados</div>
       <div id="assigned"></div>
     </div>
   </div>
@@ -1421,7 +1421,7 @@ label {
     <div style="height:14px"></div>
   </div>
   <div style="padding:10px 16px max(14px,env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid rgba(201,168,76,.10);display:flex;gap:9px">
-    <button class="btn bt"  style="flex:1" onclick="saveNew()">Guardar</button>
+    <button class="btn bt"  style="flex:1" onclick="saveNew()" id="save-btn">Guardar</button>
     <button class="btn bgl" style="flex:1" onclick="shareCard()">Compartir resumen</button>
   </div>
 </div>
@@ -1450,8 +1450,8 @@ label {
   <div class="mq" id="modal-q">¿Quién pidió este artículo? Puedes seleccionar varios.</div>
   <div class="mpers" id="m-pers"></div>
   <div class="ma">
-    <button class="btn bgl" onclick="closeModal()">Cancelar</button>
-    <button class="btn bt"  onclick="confirmAssign()">Confirmar</button>
+    <button class="btn bgl" onclick="closeModal()" id="modal-cancel-btn">Cancelar</button>
+    <button class="btn bt"  onclick="confirmAssign()" id="modal-confirm-btn">Confirmar</button>
   </div>
 </div>
 
@@ -1545,6 +1545,7 @@ const T = {
     drag:'Arrastra artículos sobre un participante →',
     receiptRef:'Ver recibo',
     scanTipBody:'Cuando se abra la cámara, mantén presionado el botón de captura → selecciona <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS corregirá la perspectiva automáticamente.',
+    scanHint:'Captura solo los artículos del recibo, de cerca y desde arriba. Los totales e impuestos los calculamos nosotros.',
     tapHintTxt:'Toca el recibo para leer artículos',
     tapHint:'Toca el recibo para añadir un artículo',
     tapTitle:'Añadir artículo',
@@ -1568,7 +1569,9 @@ const T = {
     tipLbl: pct => pct ? `Propina (${pct}%)` : 'Propina',
     totalPay:'Total a pagar',
     athBtn:'Pagar con ATH Móvil',
-    subtotalLbl:'Subtotal',
+
+    scResumen:'RESUMEN', scTotal:'Total de la noche', scFooter:'Dividido con Frac',
+    shareTitle:'Frac · Resumen de la noche',
     evenBtn:'Partes iguales',
     evenConfirm:'¿Dividir todos los artículos en partes iguales entre todos?',
     valOk:'Los artículos cuadran con el recibo.',
@@ -1607,6 +1610,7 @@ const T = {
     drag:'Drag items onto a participant →',
     receiptRef:'View receipt',
     scanTipBody:'When camera opens, press and hold the capture button → select <strong style="color:var(--gold-l)">"Scan Documents"</strong>. iOS will auto-correct perspective.',
+    scanHint:'Capture just the receipt items, close up and from above. We calculate totals and taxes for you.',
     tapHintTxt:'Tap receipt to read items',
     scanDocSub:'Clean, precise image',
     tapHint:'Tap receipt to add an item',
@@ -1633,6 +1637,8 @@ const T = {
     athBtn:'Pay with ATH Móvil',
     subtotalLbl:'Subtotal',
     evenBtn:'Split evenly',
+    scResumen:'SUMMARY', scTotal:"Tonight's total", scFooter:'Split with Frac',
+    shareTitle:"Frac · Tonight's Summary",
     evenConfirm:'Split every item evenly among everyone?',
     valOk:'Items match the receipt.',
     valMissing:(a,b)=>`Items add up to $${a}, but the receipt says $${b}. Something may be missing — check the list.`,
@@ -1691,8 +1697,15 @@ function applyLang() {
     'tip-s0': L.tipStd, 'tip-s1': L.tipGood, 'tip-s2': L.tipGreat, 'tip-s3': L.tipWow,
     'hist-t': L.histT, 'hist-s': L.histS,
     'modal-q': L.modalQ,
+    'scan-hint-txt': L.scanHint,
     'tax-title': L.taxTitle,
     'even-btn-lbl': L.evenBtn,
+    'change-pic-btn': L.changePic,
+    'save-btn': L.save,
+    'modal-cancel-btn': L.cancel, 'modal-confirm-btn': L.confirm,
+    'tap-cancel-btn': L.cancel,   'tap-confirm-btn': L.confirm,
+    'unassigned-lbl': L.unassign, 'assigned-sec-lbl': L.assigned,
+    'sc-resumen-lbl': L.scResumen, 'sc-total-lbl': L.scTotal, 'sc-footer-lbl': L.scFooter,
     'ath-hist-note': lang==='es'?'El botón de ATH Móvil está en cada cuenta en Resultados':'The ATH Móvil button is in each bill under Results',
     'tax-food-lbl': L.taxFoodRow, 'tax-alc-lbl': L.taxAlcRow,
   };
@@ -2523,7 +2536,9 @@ function saveNew(){
 const PNAMES=['Persona 1','Persona 2','Persona 3','Persona 4','Persona 5','Persona 6'];
 function exportCSV(){
   if(!hist.length){alert(L.noHist);return;}
-  const h=['Fecha','Restaurante',...PNAMES,'Propina ($)','Total'];
+  const hdrDate=lang==='es'?'Fecha':'Date', hdrRest=lang==='es'?'Restaurante':'Restaurant',
+        hdrTip=lang==='es'?'Propina ($)':'Tip ($)', hdrTotal=lang==='es'?'Total':'Total';
+  const h=[hdrDate,hdrRest,...PNAMES,hdrTip,hdrTotal];
   const rows=hist.map(e=>{
     const a=PNAMES.map((_,i)=>{const p=e.persons[i];return p?f2(p.total):'0.00';});
     return[e.date,`"${e.restaurant}"`,...a,f2(e.tipTotal||0),f2(e.grandTotal)].join(',');
@@ -2628,7 +2643,7 @@ function shareCardFromHist() {
     canvas.toBlob(blob=>{
       const file = new File([blob],'frac-resumen.png',{type:'image/png'});
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        navigator.share({files:[file],title:'Frac · Resumen'});
+        navigator.share({files:[file],title:L.shareTitle});
       } else {
         const a=document.createElement('a');a.href=URL.createObjectURL(blob);
         a.download='frac-resumen.png';a.click();
@@ -3019,7 +3034,7 @@ function shareCard(){
       canvas.toBlob(blob=>{
         const file = new File([blob],'frac-resumen.png',{type:'image/png'});
         if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-          navigator.share({files:[file],title:'Frac · Resumen de la noche'}).catch(()=>{});
+          navigator.share({files:[file],title:L.shareTitle}).catch(()=>{});
         } else {
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
@@ -3055,7 +3070,7 @@ function shareCard(){
       </svg>
       <span style="font-size:22px;font-weight:900;color:#F5F0E8;letter-spacing:-.05em;line-height:1">Frac</span>
     </div>
-    <span style="font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(201,168,76,.45)">RESUMEN</span>
+    <span id="sc-resumen-lbl" style="font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(201,168,76,.45)">RESUMEN</span>
   </div>
 
   <div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(201,168,76,.12)">
@@ -3068,7 +3083,7 @@ function shareCard(){
   <div style="border-top:1px solid rgba(201,168,76,.16);padding-top:16px;
               display:flex;justify-content:space-between;align-items:center">
     <span style="font-size:10px;font-weight:700;color:rgba(245,240,232,.32);
-                 text-transform:uppercase;letter-spacing:.14em">Total de la noche</span>
+                 text-transform:uppercase;letter-spacing:.14em"><span id="sc-total-lbl">Total de la noche</span></span>
     <div style="display:flex;align-items:baseline;gap:2px">
       <span style="font-size:14px;font-weight:700;color:#C9A84C;
                    font-family:'JetBrains Mono',monospace;line-height:1">$</span>
@@ -3079,7 +3094,7 @@ function shareCard(){
 
   <div style="margin-top:18px;padding-top:12px;border-top:1px solid rgba(255,255,255,.04);text-align:center">
     <span style="font-size:9px;color:rgba(245,240,232,.15);letter-spacing:.16em;text-transform:uppercase">
-      Dividido con Frac · fracapp.vercel.app
+      <span id="sc-footer-lbl">Dividido con Frac</span> · fracapp.thegriit.com
     </span>
   </div>
 </div>
